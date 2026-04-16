@@ -20,8 +20,8 @@ dependencies:
   # FIXME: why was pointycastle downgraded to ^3.9.1 before?
   pointycastle: '>=3.9.1 <5.0.0'
   uuid: ^4.5.1
-  oidc: ^0.13.0
-  oidc_default_store: ^0.5.0  
+  oidc: ^0.14.0+2
+  oidc_default_store: ^0.6.0+2  
 
 dev_dependencies:
   flutter_test:

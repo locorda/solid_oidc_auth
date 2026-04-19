@@ -58,10 +58,11 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Container(
           decoration: screenWidth(context) < 1175
-              ? BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/background.jpg'),
-                    fit: BoxFit.cover,
+              ? const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [titleAsh, lightBlue],
                   ),
                 )
               : null,
@@ -72,10 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   : Expanded(
                       flex: 7,
                       child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/background.jpg'),
-                            fit: BoxFit.cover,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [titleAsh, lightBlue],
                           ),
                         ),
                       ),
@@ -102,10 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: EdgeInsets.all(30),
                         child: Column(
                           children: [
-                            Image.asset(
-                              "assets/images/authentication-logo.png",
-                              width: 400,
-                            ),
+                            const _SolidLogo(),
                             SizedBox(height: 0.0),
                             Divider(height: 15, thickness: 2),
                             SizedBox(height: 60.0),
@@ -297,6 +296,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontFamily: 'Poppins',
               ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SolidLogo extends StatelessWidget {
+  const _SolidLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: const [
+        Icon(Icons.shield_outlined, size: 64, color: titleAsh),
+        SizedBox(height: 8),
+        Text(
+          'SOLID',
+          style: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            color: titleAsh,
+            letterSpacing: 6,
+          ),
+        ),
+        Text(
+          'Authentication',
+          style: TextStyle(
+            fontSize: 14,
+            color: lightBlue,
+            letterSpacing: 2,
           ),
         ),
       ],

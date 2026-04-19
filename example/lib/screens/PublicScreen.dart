@@ -1,13 +1,13 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 // Project imports:
 import 'package:solid_auth_example/models/Responsive.dart';
 import 'package:solid_auth_example/screens/PublicProfile.dart';
 
 class PublicScreen extends StatelessWidget {
-  final SolidAuth solidAuth;
+  final SolidOidcAuth solidAuth;
   final String webId; // Web ID for public profile
 
   PublicScreen({Key? key, required this.solidAuth, required this.webId})

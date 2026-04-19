@@ -23,10 +23,10 @@
 /// ## Quick Start
 ///
 /// ```dart
-/// import 'package:solid_auth/solid_auth.dart';
+/// import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 ///
-/// // 1. Initialize SolidAuth with your client configuration
-/// final solidAuth = SolidAuth(
+/// // 1. Initialize SolidOidcAuth with your client configuration
+/// final solidAuth = SolidOidcAuth(
 ///   oidcClientId: 'https://myapp.com/client-profile.jsonld',
 ///   appUrlScheme: 'com.mycompany.myapp',
 ///   frontendRedirectUrl: Uri.parse('https://myapp.com/auth/callback.html'),
@@ -88,14 +88,14 @@
 ///
 /// ### Redirect URI Construction
 ///
-/// The redirect URIs must match the patterns used by SolidAuth based on your platform:
+/// The redirect URIs must match the patterns used by SolidOidcAuth based on your platform:
 ///
 /// **For `redirect_uris`:**
-/// - Web: The exact `frontendRedirectUrl` you provide to SolidAuth
+/// - Web: The exact `frontendRedirectUrl` you provide to SolidOidcAuth
 /// - Mobile/Desktop: `{appUrlScheme}://redirect`
 ///
 /// **For `post_logout_redirect_uris`:**
-/// - Web: The exact `frontendRedirectUrl` you provide to SolidAuth
+/// - Web: The exact `frontendRedirectUrl` you provide to SolidOidcAuth
 /// - Mobile/Desktop: `{appUrlScheme}://logout`
 ///
 /// ### Required Scopes
@@ -155,6 +155,6 @@
 /// - [Solid Project](https://solidproject.org/)
 /// - [Solid OIDC Specification](https://solid.github.io/solid-oidc/)
 /// - [WebID Specification](https://www.w3.org/2005/Incubator/webid/spec/identity/)
-library solid_auth;
+library solid_oidc_auth;
 
-export 'src/solid_auth.dart';
+export 'src/solid_oidc_auth.dart';

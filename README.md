@@ -11,9 +11,9 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages). 
 -->
 
-# Solid Auth
+# Solid OIDC Auth
 
-[![pub package](https://img.shields.io/pub/v/solid_auth.svg)](https://pub.dev/packages/solid_auth)
+[![pub package](https://img.shields.io/pub/v/solid_oidc_auth.svg)](https://pub.dev/packages/solid_oidc_auth)
 
 A Flutter library for authenticating with [Solid pods](https://solidproject.org/) using OpenID Connect, implementing the [Solid-OIDC specification](https://solid.github.io/solid-oidc/).
 
@@ -21,7 +21,6 @@ This library provides a simple, reactive interface for Solid authentication that
 
 Built on the robust foundation of [Bdaya-Dev/oidc](https://pub.dev/packages/oidc), this package focuses specifically on Solid pod authentication while leveraging excellent, well-maintained OpenID Connect functionality.
 
-This package includes an embedded copy of the [dart_jsonwebtoken](https://pub.dev/packages/dart_jsonwebtoken) package with modifications for Solid-OIDC compatibility.
 
 ## ✨ Features
 
@@ -43,7 +42,7 @@ start using the package. -->
 ### 1. Add to pubspec.yaml
 
 ```sh
-dart pub add solid_auth
+dart pub add solid_oidc_auth
 ```
 
 ### 2. Create Your Client Profile
@@ -80,13 +79,13 @@ If you host this at `https://myapp.com/client-profile.jsonld`, then:
 - The `oidcClientId` parameter **must** be `'https://myapp.com/client-profile.jsonld'`
 - Both values **must** be identical
 
-### 3. Initialize SolidAuth
+### 3. Initialize SolidOidcAuth
 
 ```dart
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
-// Initialize SolidAuth with your client configuration
-final solidAuth = SolidAuth(
+// Initialize SolidOidcAuth with your client configuration
+final solidAuth = SolidOidcAuth(
   // This URL must exactly match the "client_id" field in your client-profile.jsonld
   oidcClientId: 'https://myapp.com/client-profile.jsonld',
   appUrlScheme: 'com.mycompany.myapp',
@@ -195,7 +194,7 @@ await solidAuth.dispose();
 
 ## ⚡ Advanced: DPoP Token Generation in Worker Threads
 
-For performance-critical applications that need to generate many DPoP tokens without blocking the UI, `solid_auth` provides a Flutter-free entry point for use in Dart isolates and web workers.
+For performance-critical applications that need to generate many DPoP tokens without blocking the UI, `solid_oidc_auth` provides a Flutter-free entry point for use in Dart isolates and web workers.
 
 ### Why Use Worker Threads?
 
@@ -209,9 +208,9 @@ For performance-critical applications that need to generate many DPoP tokens wit
 ```
 Main Thread (Flutter)          Worker Thread (Pure Dart)
 ─────────────────────         ─────────────────────────
-import 'solid_auth.dart'      import 'solid_auth/worker.dart'
+import 'solid_oidc_auth.dart'      import 'solid_oidc_auth/worker.dart'
                   
-SolidAuth                      DpopCredentials
+SolidOidcAuth                      DpopCredentials
 ├─ authenticate() ────────────> (serialize)
 ├─ exportDpopCredentials()     ├─ fromJson()
 └─ (Flutter/OIDC flow)         └─ generateDpopToken()
@@ -222,7 +221,7 @@ SolidAuth                      DpopCredentials
 ```dart
 // worker.dart - Pure Dart worker thread (NO Flutter imports!)
 import 'dart:isolate';
-import 'package:solid_auth/worker.dart'; // ← Flutter-free entry point
+import 'package:solid_oidc_auth/worker.dart'; // ← Flutter-free entry point
 
 void workerEntryPoint(Map<String, dynamic> message) {
   final credentials = DpopCredentials.fromJson(message['credentials']);
@@ -243,7 +242,7 @@ void workerEntryPoint(Map<String, dynamic> message) {
 
 ```dart
 // main.dart - Main thread with Flutter
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 Future<DPoP> generateInWorker(String url, String method) async {
   // Export credentials from authenticated session
@@ -314,14 +313,14 @@ Future<List<DPoP>> generateMultipleTokens(
 
 ### Important: Flutter-Free Entry Point
 
-The `package:solid_auth/worker.dart` library is specifically designed to work without Flutter:
+The `package:solid_oidc_auth/worker.dart` library is specifically designed to work without Flutter:
 
 ```dart
 // ✅ Correct - Use in worker threads
-import 'package:solid_auth/worker.dart';
+import 'package:solid_oidc_auth/worker.dart';
 
 // ❌ Wrong - Has Flutter dependencies
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 ```
 
 **What's in `worker.dart`:**
@@ -330,7 +329,7 @@ import 'package:solid_auth/solid_auth.dart';
 - `KeyPair` - Platform-agnostic RSA keys
 
 **What's NOT in `worker.dart`:**
-- `SolidAuth` - Main authentication class (requires Flutter)
+- `SolidOidcAuth` - Main authentication class (requires Flutter)
 - OIDC flow management
 - UI components
 - Platform-specific storage
@@ -442,35 +441,36 @@ Example for `DebugProfile.entitlements`:
 
 ## 📖 Additional Information
 
-The source code can be accessed via [GitHub repository](https://github.com/anusii/solid_auth). You can also file issues you face at [GitHub Issues](https://github.com/anusii/solid_auth/issues).
+The source code can be accessed via [GitHub repository](https://github.com/locorda/solid_oidc_auth). You can also file issues you face at [GitHub Issues](https://github.com/locorda/solid_oidc_auth/issues).
 
-An example project that demonstrates `solid_auth` usage can be found [here](https://github.com/anusii/solid_auth/tree/main/example).
+An example project that demonstrates `solid_oidc_auth` usage can be found [here](https://github.com/locorda/solid_oidc_auth/tree/main/example).
 
 ## 🙏 Acknowledgments
 
 This library builds upon the excellent work of the [Bdaya-Dev/oidc](https://github.com/Bdaya-Dev/oidc) team. We are standing on the shoulders of giants! 
 
 Special thanks to:
+- **[anusii/solid_auth](https://github.com/anusii/solid_auth)** - The original Solid authentication library from which this package was derived
 - **[Bdaya-Dev/oidc](https://pub.dev/packages/oidc)** - The robust, well-maintained OpenID Connect implementation that powers this library
 - **[oidc_default_store](https://pub.dev/packages/oidc_default_store)** - Secure, platform-appropriate token storage
 - The broader Solid and OpenID Connect communities for their specifications and guidance
 
-The solid_auth library focuses specifically on Solid pod authentication while leveraging these excellent foundational libraries for the core OIDC functionality.
+The solid_oidc_auth library focuses specifically on Solid pod authentication while leveraging these excellent foundational libraries for the core OIDC functionality.
 
 ## 🔗 Links
 
 - [Solid Project](https://solidproject.org/)
 - [Solid OIDC Specification](https://solid.github.io/solid-oidc/)  
 - [WebID Specification](https://www.w3.org/2005/Incubator/webid/spec/identity/)
-- [Example Application](https://github.com/anusii/solid_auth/tree/main/example)
-- [Issue Tracker](https://github.com/anusii/solid_auth/issues)
+- [Example Application](https://github.com/locorda/solid_oidc_auth/tree/main/example)
+- [Issue Tracker](https://github.com/locorda/solid_oidc_auth/issues)
 
 ---
 
 ## Roadmap
 
 ### Offline-First Support
-Currently, `solid_auth` requires network connectivity during initialization to:
+Currently, `solid_oidc_auth` requires network connectivity during initialization to:
 - Discover identity providers from WebID profiles
 - Fetch OIDC provider configurations
 - Validate authentication sessions

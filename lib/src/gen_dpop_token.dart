@@ -7,19 +7,19 @@
 /// ## Architecture Note
 ///
 /// This file is intentionally free of Flutter dependencies to enable:
-/// - Use in worker threads/isolates via `package:solid_auth/worker.dart`
+/// - Use in worker threads/isolates via `package:solid_oidc_auth/worker.dart`
 /// - Pure Dart testing without Flutter test harness
 /// - Potential reuse in non-Flutter Dart projects
 ///
 /// ## Internal API
 ///
 /// This is not part of the public API. End users should use:
-/// - `SolidAuth.genDpopToken()` in the main thread
+/// - `SolidOidcAuth.genDpopToken()` in the main thread
 /// - `DpopCredentials.generateDpopToken()` in worker threads
-library solid_auth.src.gen_dpop_token;
+library solid_oidc_auth.src.gen_dpop_token;
 
-import 'package:solid_auth/src/jwt/dart_jsonwebtoken.dart';
-import 'package:solid_auth/src/rsa/rsa_api.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:solid_oidc_auth/src/rsa/rsa_api.dart';
 import 'package:uuid/uuid.dart';
 
 /// Generates a DPoP token for authenticated API requests.
@@ -64,7 +64,6 @@ String genDpopToken(String endPointUrl, KeyPair rsaKeyPair,
     "htu": endPointUrl,
     "htm": httpMethod,
     "jti": tokenId,
-    "iat": (DateTime.now().millisecondsSinceEpoch / 1000).round()
   };
 
   /// Create a json web token

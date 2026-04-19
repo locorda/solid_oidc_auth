@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
-import 'package:solid_auth/src/oidc/dpop_credentials.dart';
-import 'package:solid_auth/src/oidc/solid_oidc_user_manager.dart';
-export 'package:solid_auth/src/oidc/solid_oidc_user_manager.dart'
+import 'package:solid_oidc_auth/src/oidc/dpop_credentials.dart';
+import 'package:solid_oidc_auth/src/oidc/solid_oidc_user_manager.dart';
+export 'package:solid_oidc_auth/src/oidc/solid_oidc_user_manager.dart'
     show UserAndWebId;
-export 'package:solid_auth/src/oidc/dpop_credentials.dart'
+export 'package:solid_oidc_auth/src/oidc/dpop_credentials.dart'
     show DpopCredentials, DPoP;
 
 /// The default refresh behavior: refresh tokens 1 minute before they expire.
@@ -33,20 +33,20 @@ final _log = Logger("solid_authentication_oidc");
 /// ## Example
 /// ```dart
 /// // Use default settings
-/// final settings = SolidAuthSettings();
+/// final settings = SolidOidcAuthSettings();
 ///
 /// // Customize specific settings
-/// final customSettings = SolidAuthSettings(
+/// final customSettings = SolidOidcAuthSettings(
 ///   strictJwtVerification: true,
 ///   expiryTolerance: Duration(minutes: 2),
 ///   prompt: ['consent'],
 /// );
 /// ```
-class SolidAuthSettings {
+class SolidOidcAuthSettings {
   /// Creates authentication settings with the specified options.
   ///
   /// All parameters are optional and have sensible defaults for most use cases.
-  const SolidAuthSettings({
+  const SolidOidcAuthSettings({
     this.uiLocales,
     this.extraTokenHeaders,
     this.prompt = const [],
@@ -185,13 +185,13 @@ class SolidAuthSettings {
   ///
   /// ## Example
   /// ```dart
-  /// final baseSettings = SolidAuthSettings();
+  /// final baseSettings = SolidOidcAuthSettings();
   /// final strictSettings = baseSettings.copyWith(
   ///   strictJwtVerification: true,
   ///   expiryTolerance: Duration(seconds: 30),
   /// );
   /// ```
-  SolidAuthSettings copyWith({
+  SolidOidcAuthSettings copyWith({
     List<String>? uiLocales,
     Map<String, String>? extraTokenHeaders,
     List<String>? prompt,
@@ -214,7 +214,7 @@ class SolidAuthSettings {
     Map<String, String>? extraRevocationHeaders,
     GetIssuers? getIssuers,
   }) {
-    return SolidAuthSettings(
+    return SolidOidcAuthSettings(
       uiLocales: uiLocales ?? this.uiLocales,
       extraTokenHeaders: extraTokenHeaders ?? this.extraTokenHeaders,
       prompt: prompt ?? this.prompt,
@@ -254,9 +254,9 @@ class SolidAuthSettings {
 /// - **postLogoutRedirectUri**: Where users are sent after logging out
 /// - **frontChannelLogoutUri**: Used for single sign-out notifications
 ///
-/// For most applications, you should use [SolidAuth.createUriSettings] to
+/// For most applications, you should use [SolidOidcAuth.createUriSettings] to
 /// generate appropriate settings automatically based on your platform.
-class SolidAuthUriSettings {
+class SolidOidcAuthUriSettings {
   /// The URI where users will be redirected after successful authentication.
   ///
   /// This URI must be registered with your OIDC client configuration
@@ -288,13 +288,13 @@ class SolidAuthUriSettings {
   ///
   /// ## Example
   /// ```dart
-  /// final uriSettings = SolidAuthUriSettings(
+  /// final uriSettings = SolidOidcAuthUriSettings(
   ///   redirectUri: Uri.parse('https://myapp.com/auth/callback'),
   ///   postLogoutRedirectUri: Uri.parse('https://myapp.com/'),
   ///   frontChannelLogoutUri: Uri.parse('https://myapp.com/auth/logout'),
   /// );
   /// ```
-  SolidAuthUriSettings({
+  SolidOidcAuthUriSettings({
     required this.redirectUri,
     required this.postLogoutRedirectUri,
     required this.frontChannelLogoutUri,
@@ -305,7 +305,7 @@ class SolidAuthUriSettings {
 
 /// Main class for authenticating with Solid pods using OpenID Connect.
 ///
-/// [SolidAuth] provides a simplified, reactive interface for Solid authentication
+/// [SolidOidcAuth] provides a simplified, reactive interface for Solid authentication
 /// that handles the complexity of OIDC flows, token management, and WebID discovery.
 ///
 /// ## Key Features
@@ -320,8 +320,8 @@ class SolidAuthUriSettings {
 /// ## Basic Usage
 ///
 /// ```dart
-/// // Initialize SolidAuth
-/// final solidAuth = SolidAuth(
+/// // Initialize SolidOidcAuth
+/// final solidAuth = SolidOidcAuth(
 ///   oidcClientId: 'https://myapp.com/client-profile.jsonld',
 ///   appUrlScheme: 'myapp',
 ///   frontendRedirectUrl: Uri.parse('https://myapp.com/redirect.html'),
@@ -369,20 +369,20 @@ class SolidAuthUriSettings {
 /// - The client configuration document must be served over HTTPS
 /// - DPoP tokens are automatically generated to prevent token replay attacks
 /// - Session data is stored securely using platform-appropriate mechanisms
-class SolidAuth {
+class SolidOidcAuth {
   SolidOidcUserManager? _manager;
   final ValueNotifier<bool> _isAuthenticatedNotifier =
       ValueNotifier<bool>(false);
 
   final OidcStore _store;
   final String _oidcClientId;
-  final SolidAuthSettings _settings;
-  final SolidAuthUriSettings _uriSettings;
+  final SolidOidcAuthSettings _settings;
+  final SolidOidcAuthUriSettings _uriSettings;
   // Storage keys for persisting authentication parameters
   static const String _webIdOrIssuerKey = 'solid_auth_webid_or_issuer';
   static const String _scopesKey = 'solid_auth_scopes';
 
-  /// Creates a new SolidAuth instance with automatic redirect URI configuration.
+  /// Creates a new SolidOidcAuth instance with automatic redirect URI configuration.
   ///
   /// This is the recommended constructor for most applications as it automatically
   /// configures appropriate redirect URIs based on your platform and parameters.
@@ -421,7 +421,7 @@ class SolidAuth {
   ///
   /// ## Example
   /// ```dart
-  /// final solidAuth = SolidAuth(
+  /// final solidAuth = SolidOidcAuth(
   ///   oidcClientId: 'https://myapp.example.com/client-profile.jsonld',
   ///   appUrlScheme: 'com.mycompany.myapp',
   ///   frontendRedirectUrl: Uri.parse('https://myapp.example.com/auth/callback.html'),
@@ -457,21 +457,21 @@ class SolidAuth {
   ///
   /// Additional scopes (like `profile`, `email`, etc.) can be included in the client
   /// profile and requested during authentication via the `scopes` parameter in [authenticate].
-  SolidAuth({
+  SolidOidcAuth({
     required String oidcClientId,
     required String appUrlScheme,
     required Uri frontendRedirectUrl,
-    SolidAuthSettings? settings,
+    SolidOidcAuthSettings? settings,
     OidcStore? store,
   })  : _oidcClientId = oidcClientId,
-        _settings = settings ?? const SolidAuthSettings(),
-        _uriSettings = SolidAuth.createUriSettings(
+        _settings = settings ?? const SolidOidcAuthSettings(),
+        _uriSettings = SolidOidcAuth.createUriSettings(
           appUrlScheme: appUrlScheme,
           frontendRedirectUrl: frontendRedirectUrl,
         ),
         _store = store ?? OidcDefaultStore();
 
-  /// Creates a SolidAuth instance with explicit redirect URI configuration.
+  /// Creates a SolidOidcAuth instance with explicit redirect URI configuration.
   ///
   /// Use this constructor when you need full control over redirect URI configuration
   /// or when the automatic configuration from the main constructor doesn't meet
@@ -486,24 +486,24 @@ class SolidAuth {
   ///
   /// ## Example
   /// ```dart
-  /// final uriSettings = SolidAuthUriSettings(
+  /// final uriSettings = SolidOidcAuthUriSettings(
   ///   redirectUri: Uri.parse('https://myapp.com/auth/callback'),
   ///   postLogoutRedirectUri: Uri.parse('https://myapp.com/'),
   ///   frontChannelLogoutUri: Uri.parse('https://myapp.com/auth/logout'),
   /// );
   ///
-  /// final solidAuth = SolidAuth.forRedirects(
+  /// final solidAuth = SolidOidcAuth.forRedirects(
   ///   oidcClientId: 'https://myapp.com/client-profile.jsonld',
   ///   uriSettings: uriSettings,
   /// );
   /// ```
-  SolidAuth.forRedirects({
+  SolidOidcAuth.forRedirects({
     required String oidcClientId,
-    required SolidAuthUriSettings uriSettings,
-    SolidAuthSettings? settings,
+    required SolidOidcAuthUriSettings uriSettings,
+    SolidOidcAuthSettings? settings,
     OidcStore? store,
   })  : _oidcClientId = oidcClientId,
-        _settings = settings ?? const SolidAuthSettings(),
+        _settings = settings ?? const SolidOidcAuthSettings(),
         _store = store ?? OidcDefaultStore(),
         _uriSettings = uriSettings;
 
@@ -557,7 +557,7 @@ class SolidAuth {
     }
   }
 
-  /// Initializes the SolidAuth instance and attempts to restore any existing session.
+  /// Initializes the SolidOidcAuth instance and attempts to restore any existing session.
   ///
   /// This method must be called before using any other authentication methods.
   /// It performs the following operations:
@@ -574,7 +574,7 @@ class SolidAuth {
   ///
   /// ## Example
   /// ```dart
-  /// final solidAuth = SolidAuth(/* ... */);
+  /// final solidAuth = SolidOidcAuth(/* ... */);
   ///
   /// // Initialize and check for existing session
   /// final hasExistingSession = await solidAuth.init();
@@ -820,22 +820,22 @@ class SolidAuth {
   ///
   /// ## Return Value
   ///
-  /// Returns a [SolidAuthUriSettings] object with platform-appropriate redirect URIs.
+  /// Returns a [SolidOidcAuthUriSettings] object with platform-appropriate redirect URIs.
   ///
   /// ## Example
   /// ```dart
-  /// final uriSettings = SolidAuth.createUriSettings(
+  /// final uriSettings = SolidOidcAuth.createUriSettings(
   ///   appUrlScheme: 'com.mycompany.myapp',
   ///   frontendRedirectUrl: Uri.parse('https://myapp.com/auth/callback.html'),
   /// );
   ///
   /// // Use with explicit constructor
-  /// final solidAuth = SolidAuth.forRedirects(
+  /// final solidAuth = SolidOidcAuth.forRedirects(
   ///   oidcClientId: 'https://myapp.com/client-profile.jsonld',
   ///   uriSettings: uriSettings,
   /// );
   /// ```
-  static SolidAuthUriSettings createUriSettings({
+  static SolidOidcAuthUriSettings createUriSettings({
     required String appUrlScheme,
     required Uri frontendRedirectUrl,
   }) {
@@ -843,7 +843,7 @@ class SolidAuth {
       // Web platform uses HTML redirect page
       final htmlPageLink = frontendRedirectUrl;
 
-      return SolidAuthUriSettings(
+      return SolidOidcAuthUriSettings(
           redirectUri: htmlPageLink,
           postLogoutRedirectUri: htmlPageLink,
           frontChannelLogoutUri: htmlPageLink.replace(
@@ -853,7 +853,7 @@ class SolidAuth {
             },
           ));
     } else {
-      return SolidAuthUriSettings(
+      return SolidOidcAuthUriSettings(
         redirectUri: Uri.parse('${appUrlScheme}://redirect'),
         postLogoutRedirectUri: Uri.parse('${appUrlScheme}://logout'),
         frontChannelLogoutUri: Uri.parse('${appUrlScheme}://logout'),
@@ -1032,7 +1032,7 @@ class SolidAuth {
   /// - RSA key pair is not initialized
   DpopCredentials exportDpopCredentials() {
     if (_manager == null) {
-      throw Exception('SolidAuth not initialized. Call authenticate() first.');
+      throw Exception('SolidOidcAuth not initialized. Call authenticate() first.');
     }
     return _manager!.exportDpopCredentials();
   }
@@ -1116,7 +1116,7 @@ class SolidAuth {
     _updateAuthenticationState();
   }
 
-  /// Dispose of resources when SolidAuth is no longer needed.
+  /// Dispose of resources when SolidOidcAuth is no longer needed.
   ///
   /// This method cleans up internal resources (ValueNotifier) but does NOT
   /// clear stored authentication data or logout the user.

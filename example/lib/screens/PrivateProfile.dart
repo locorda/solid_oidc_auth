@@ -10,11 +10,11 @@ import 'package:solid_auth_example/models/Constants.dart';
 import 'package:solid_auth_example/screens/ProfileInfo.dart';
 import 'package:solid_auth_example/components/Header.dart';
 import 'package:solid_auth_example/models/SolidApi.dart' as rest_api;
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 import 'package:solid_auth_example/models/GetRdfData.dart';
 
 class PrivateProfile extends StatefulWidget {
-  final SolidAuth solidAuth; // SolidAuth instance
+  final SolidOidcAuth solidAuth; // SolidOidcAuth instance
 
   const PrivateProfile({Key? key, required this.solidAuth}) : super(key: key);
 
@@ -75,7 +75,7 @@ class _PrivateProfileState extends State<PrivateProfile> {
     );
   }
 
-  Widget _loadedScreen(Object profInfo, String webId, SolidAuth solidAuth) {
+  Widget _loadedScreen(Object profInfo, String webId, SolidOidcAuth solidAuth) {
     // Read profile info from the turtle file
     PodProfile podProfile = PodProfile(profInfo.toString());
 

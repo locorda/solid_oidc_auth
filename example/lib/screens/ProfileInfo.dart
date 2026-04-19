@@ -1,6 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 // Project imports:
 import 'package:solid_auth_example/models/Constants.dart';
 import 'package:solid_auth_example/screens/EditProfile.dart';
@@ -8,7 +8,7 @@ import 'package:solid_auth_example/screens/EditProfile.dart';
 class ProfileInfo extends StatelessWidget {
   final Map profData; // Profile data
   final String profType; // Public or private
-  final SolidAuth solidAuth; // SolidAuth instance
+  final SolidOidcAuth solidAuth; // SolidOidcAuth instance
   const ProfileInfo({
     Key? key,
     required this.profData,

@@ -10,10 +10,10 @@
 
 import 'dart:isolate';
 // For the "main" side of this example
-import 'package:solid_auth/solid_auth.dart' show SolidAuth;
+import 'package:solid_oidc_auth/solid_oidc_auth.dart' show SolidOidcAuth;
 // In the real pure worker.dart file, you must not import solid_auth.dart directly
 // to avoid flutter dependencies. Instead, import only the necessary parts:
-import 'package:solid_auth/worker.dart';
+import 'package:solid_oidc_auth/worker.dart';
 
 // Simple message passing between main and worker
 class _WorkerMessage {
@@ -75,7 +75,7 @@ void main() async {
   // In a real app, authentication happens in the UI with browser redirects.
 
   // Initialize and authenticate (must be on main thread)
-  final solidAuth = SolidAuth(
+  final solidAuth = SolidOidcAuth(
     oidcClientId: 'https://myapp.com/client-profile.jsonld',
     appUrlScheme: 'myapp',
     frontendRedirectUrl: Uri.parse('https://myapp.com/redirect.html'),

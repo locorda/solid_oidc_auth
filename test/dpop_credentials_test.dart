@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:solid_auth/src/oidc/dpop_credentials.dart';
+import 'package:solid_oidc_auth/src/oidc/dpop_credentials.dart';
 
 void main() {
   group('DpopCredentials', () {

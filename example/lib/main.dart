@@ -1,7 +1,7 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 // Project imports:
 import 'package:solid_auth_example/screens/LoginScreen.dart';
@@ -24,14 +24,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late final SolidAuth solidAuth;
+  late final SolidOidcAuth solidAuth;
   late final Future<bool> _initFuture;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize SolidAuth with OIDC client configuration
+    // Initialize SolidOidcAuth with OIDC client configuration
     //
     // Security Model:
     // - For web: Relies on DNS security and browser Same-Origin Policy for redirect validation
@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
     // for Windows and Linux desktop applications. This approach is NOT well supported with
     // client-profile.jsonld static configuration. Windows and Linux desktop apps are NOT ADVISED
     // until further research determines how to support this securely with pre-defined redirect URIs.
-    solidAuth = SolidAuth(
+    solidAuth = SolidOidcAuth(
       // OIDC Client ID: URL pointing to the client profile document (client-profile.jsonld)
       // In Solid OIDC, this URL itself serves as the client_id and must be used in two places:
       // 1. Here as the oidcClientId parameter
@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
           'https://kkalass.github.io/solid_auth/example/client-profile.jsonld',
 
       // App URL Scheme: Custom URI scheme for mobile/desktop platforms (ios/android/macos)
-      // SolidAuth will automatically construct redirect and logout URIs using this scheme:
+      // SolidOidcAuth will automatically construct redirect and logout URIs using this scheme:
       // - '${appUrlScheme}://redirect' for authentication redirects
       // - '${appUrlScheme}://logout' for logout redirects
       // These constructed URIs must match entries in the client-profile.jsonld redirect_uris array
@@ -101,13 +101,13 @@ class _MyAppState extends State<MyApp> {
       ),
     );
 
-    // Initialize SolidAuth and prepare for reactive authentication state changes
+    // Initialize SolidOidcAuth and prepare for reactive authentication state changes
     _initFuture = solidAuth.init();
   }
 
   @override
   void dispose() {
-    // Properly dispose of SolidAuth resources when the app shuts down
+    // Properly dispose of SolidOidcAuth resources when the app shuts down
     solidAuth.dispose();
     super.dispose();
   }
@@ -119,7 +119,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Solid Authentication',
       theme: ThemeData(),
       home: FutureBuilder<bool>(
-        // Wait for SolidAuth initialization to complete
+        // Wait for SolidOidcAuth initialization to complete
         future: _initFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

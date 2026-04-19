@@ -1,3 +1,19 @@
+## [0.2.0]
+
+### Breaking Changes
+* Package renamed from `solid_auth` to `solid_oidc_auth`
+* Main class renamed from `SolidAuth` to `SolidOidcAuth`
+* `SolidAuthSettings` renamed to `SolidOidcAuthSettings`
+* `SolidAuthUriSettings` renamed to `SolidOidcAuthUriSettings`
+* Entry point changed from `package:solid_auth/solid_auth.dart` to `package:solid_oidc_auth/solid_oidc_auth.dart`
+* Worker entry point changed from `package:solid_auth/worker.dart` to `package:solid_oidc_auth/worker.dart`
+* Minimum SDK constraint tightened to `>=3.0.0`
+
+### Changes
+* Replaced embedded `dart_jsonwebtoken` copy with upstream `dart_jsonwebtoken ^3.3.2` dependency
+* Removed `collection` dependency (was only used by embedded JWT code)
+* DPoP token `iat` claim now set by upstream `dart_jsonwebtoken` (functionally identical, UTC-based)
+
 ## [0.1.27 20250626]
 * Repair pointycastle dependency
 

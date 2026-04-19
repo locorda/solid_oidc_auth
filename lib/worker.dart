@@ -6,7 +6,7 @@
 ///
 /// ## Purpose
 ///
-/// The main `solid_auth` library depends on Flutter for UI components and
+/// The main `solid_oidc_auth` library depends on Flutter for UI components and
 /// platform-specific storage. Worker threads and isolates cannot access Flutter
 /// APIs, so this library provides a separate entry point that:
 ///
@@ -18,10 +18,10 @@
 /// ## Usage Pattern
 ///
 /// ```dart
-/// // Main thread (can use full solid_auth library)
-/// import 'package:solid_auth/solid_auth.dart';
+/// // Main thread (can use full solid_oidc_auth library)
+/// import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 ///
-/// final solidAuth = SolidAuth(...);
+/// final solidAuth = SolidOidcAuth(...);
 /// await solidAuth.init();
 /// await solidAuth.authenticate('https://alice.pod.com/profile/card#me');
 ///
@@ -34,7 +34,7 @@
 ///
 /// ```dart
 /// // Worker thread (uses Flutter-free worker library)
-/// import 'package:solid_auth/worker.dart';
+/// import 'package:solid_oidc_auth/worker.dart';
 ///
 /// void workerEntryPoint(Map<String, dynamic> credentialsJson) {
 ///   // Deserialize credentials
@@ -58,7 +58,7 @@
 ///
 /// ## What's NOT Exported
 ///
-/// - [SolidAuth]: Main authentication class (requires Flutter)
+/// - [SolidOidcAuth]: Main authentication class (requires Flutter)
 /// - OIDC flow management (requires Flutter for browser redirects)
 /// - Session persistence (requires Flutter for platform storage)
 /// - Any UI or platform-specific components
@@ -68,9 +68,9 @@
 /// ```
 /// ┌─────────────────────────────────────────┐
 /// │         Main Thread (Flutter)           │
-/// │  import 'package:solid_auth/solid_auth' │
+/// │  import 'package:solid_oidc_auth/solid_oidc_auth' │
 /// │                                         │
-/// │  - SolidAuth (authentication)           │
+/// │  - SolidOidcAuth (authentication)       │
 /// │  - Browser redirects                    │
 /// │  - Session management                   │
 /// │  - exportDpopCredentials()             │
@@ -81,7 +81,7 @@
 ///                      ▼
 /// ┌─────────────────────────────────────────┐
 /// │       Worker Thread (Pure Dart)         │
-/// │  import 'package:solid_auth/worker'     │
+/// │  import 'package:solid_oidc_auth/worker'     │
 /// │                                         │
 /// │  - DpopCredentials.fromJson()           │
 /// │  - generateDpopToken()                  │
@@ -102,7 +102,7 @@
 ///
 /// See [doc/dpop_worker_threads.md](../doc/dpop_worker_threads.md) for
 /// comprehensive security guidelines.
-library solid_auth.worker;
+library solid_oidc_auth.worker;
 
 export 'src/rsa/rsa_api.dart' show KeyPair;
 export 'src/oidc/dpop_credentials.dart' show DpopCredentials, DPoP;

@@ -1,10 +1,10 @@
-import 'package:solid_auth/src/rsa/rsa_api.dart' show KeyPair;
-import 'package:solid_auth/src/gen_dpop_token.dart' as solid_auth_client;
+import 'package:solid_oidc_auth/src/rsa/rsa_api.dart' show KeyPair;
+import 'package:solid_oidc_auth/src/gen_dpop_token.dart' as solid_auth_client;
 
 /// Serializable credentials for generating DPoP tokens in worker threads/isolates.
 ///
 /// This class contains all the necessary data to generate DPoP tokens without
-/// requiring access to the full [SolidAuth] instance. It's designed to be
+/// requiring access to the full [SolidOidcAuth] instance. It's designed to be
 /// safely transferred to Dart isolates or web workers.
 ///
 /// ## ⚠️ Contains Sensitive Cryptographic Material
@@ -98,7 +98,7 @@ class DpopCredentials {
   /// Generates a DPoP token using these credentials.
   ///
   /// This method can be called from any thread (main thread, isolate, or web worker)
-  /// without requiring access to a [SolidAuth] instance. It's designed for use cases where
+  /// without requiring access to a [SolidOidcAuth] instance. It's designed for use cases where
   /// DPoP token generation needs to happen on a worker thread for performance reasons.
   ///
   /// ## Parameters
@@ -159,7 +159,7 @@ class DpopCredentials {
 ///
 /// ## Usage
 ///
-/// Typically obtained from [SolidAuth.genDpopToken] and used to make authenticated
+/// Typically obtained from [SolidOidcAuth.genDpopToken] and used to make authenticated
 /// requests to Solid pod resources.
 ///
 /// ```dart

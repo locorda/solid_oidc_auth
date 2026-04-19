@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:solid_auth_example/models/Constants.dart';
 import 'package:solid_auth_example/components/Header.dart';
 import 'package:solid_auth_example/screens/ProfileInfo.dart';
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 import 'package:solid_auth_example/models/GetRdfData.dart';
 import 'package:http/http.dart' as http;
 
 class PublicProfile extends StatefulWidget {
-  final SolidAuth solidAuth; // SolidAuth instance
+  final SolidOidcAuth solidAuth; // SolidOidcAuth instance
   final String webId; // Web ID for public profile
 
   const PublicProfile({Key? key, required this.solidAuth, required this.webId})

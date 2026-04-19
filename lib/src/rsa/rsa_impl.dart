@@ -11,7 +11,7 @@ import 'rsa_fast.dart';
 /// ## Usage
 ///
 /// ```dart
-/// import 'package:solid_auth/src/rsa/rsa_impl.dart';
+/// import 'package:solid_oidc_auth/src/rsa/rsa_impl.dart';
 ///
 /// // Generate a key pair
 /// final result = await rsa.generate(2048);

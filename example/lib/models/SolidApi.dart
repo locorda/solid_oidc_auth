@@ -4,7 +4,7 @@ import 'dart:math';
 
 // Package imports:
 import 'package:http/http.dart' as http;
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 const _chars =
     'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890_-';
@@ -43,7 +43,7 @@ Future<String> fetchPrvProfile(
 
 // Update profile information
 Future<String> updateProfile(
-    String profCardUrl, SolidAuth solidAuth, String query) async {
+    String profCardUrl, SolidOidcAuth solidAuth, String query) async {
   // Generate DPoP token
   final dPopToken = solidAuth.genDpopToken(profCardUrl, 'PATCH');
 

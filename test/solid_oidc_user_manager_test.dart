@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oidc/oidc.dart';
-import 'package:solid_auth/src/oidc/solid_oidc_user_manager.dart';
+import 'package:solid_oidc_auth/src/oidc/solid_oidc_user_manager.dart';
 
 void main() {
   group('SolidOidcUserManager', () {

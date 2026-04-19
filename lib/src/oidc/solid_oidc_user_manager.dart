@@ -2,17 +2,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:oidc/oidc.dart';
-import 'package:solid_auth/src/rsa/rsa_api.dart';
-import 'package:solid_auth/src/gen_dpop_token.dart' as solid_auth_client;
-import 'package:solid_auth/src/solid_auth_issuer.dart' as solid_auth_issuer;
-import 'package:solid_auth/src/rsa/rsa_impl.dart';
+import 'package:solid_oidc_auth/src/rsa/rsa_api.dart';
+import 'package:solid_oidc_auth/src/gen_dpop_token.dart' as solid_auth_client;
+import 'package:solid_oidc_auth/src/solid_auth_issuer.dart'
+    as solid_auth_issuer;
+import 'package:solid_oidc_auth/src/rsa/rsa_impl.dart';
 import 'dpop_credentials.dart';
 
 final _log = Logger("solid_authentication_oidc");
 
 /// Contains the authentication result with both OIDC user data and validated WebID.
 ///
-/// This class is returned by [SolidAuth.authenticate] and contains all the
+/// This class is returned by [SolidOidcAuth.authenticate] and contains all the
 /// information needed to work with the authenticated user in the Solid ecosystem.
 ///
 /// ## WebID vs User Data
@@ -99,7 +100,7 @@ class UserAndWebId {
 ///   return [Uri.parse(webIdOrIssuer)];
 /// }
 ///
-/// final settings = SolidAuthSettings(
+/// final settings = SolidOidcAuthSettings(
 ///   getIssuers: customIssuerResolver,
 /// );
 /// ```
@@ -195,7 +196,7 @@ class _RsaInfo {
 ///
 /// ## Usage
 ///
-/// Typically used internally by [SolidAuth], but may be exposed for advanced
+/// Typically used internally by [SolidOidcAuth], but may be exposed for advanced
 /// use cases requiring custom OIDC flow configuration:
 ///
 /// ```dart
@@ -580,7 +581,7 @@ class SolidOidcUserManagerSettings {
 ///
 /// ## Internal Implementation
 ///
-/// This class is typically used internally by [SolidAuth] but may be exposed
+/// This class is typically used internally by [SolidOidcAuth] but may be exposed
 /// for advanced use cases requiring fine-grained control over the authentication
 /// flow, such as:
 ///

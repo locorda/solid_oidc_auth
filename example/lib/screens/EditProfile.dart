@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 //import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 // Project imports:
 import 'package:solid_auth_example/models/Constants.dart';
@@ -12,7 +12,7 @@ import 'package:solid_auth_example/models/SolidApi.dart';
 
 class EditProfile extends StatefulWidget {
   final Map profData;
-  final SolidAuth solidAuth;
+  final SolidOidcAuth solidAuth;
 
   const EditProfile({
     Key? key,

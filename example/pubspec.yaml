@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  solid_auth:
+  solid_oidc_auth:
     path: ..
 
 dev_dependencies:

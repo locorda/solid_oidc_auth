@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 //import 'package:solid_auth_example/models/RestAPI.dart';
-//import 'package:solid_auth/solid_auth.dart';
-import 'package:solid_auth/solid_auth.dart';
+//import 'package:solid_oidc_auth/solid_oidc_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 // Project imports:
 import 'package:solid_auth_example/models/Constants.dart';
 import 'package:solid_auth_example/screens/PublicScreen.dart';
@@ -16,7 +16,7 @@ const String defaultIssuerRegister =
     'https://pods.solidcommunity.au/.account/login/password/register/';
 
 class LoginScreen extends StatefulWidget {
-  final SolidAuth solidAuth;
+  final SolidOidcAuth solidAuth;
 
   LoginScreen({Key? key, required this.solidAuth}) : super(key: key);
 

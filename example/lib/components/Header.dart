@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 // Project imports:
 import 'package:solid_auth_example/models/Constants.dart';
@@ -12,7 +12,7 @@ import 'package:solid_auth_example/models/Responsive.dart';
 // ignore: must_be_immutable
 class Header extends StatelessWidget {
   var mainDrawer;
-  final SolidAuth solidAuth;
+  final SolidOidcAuth solidAuth;
   Header({
     Key? key,
     required this.mainDrawer,

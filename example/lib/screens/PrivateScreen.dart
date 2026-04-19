@@ -1,6 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:solid_auth/solid_auth.dart';
+import 'package:solid_oidc_auth/solid_oidc_auth.dart';
 
 // Project imports:
 import 'package:solid_auth_example/models/Responsive.dart';
@@ -9,7 +9,7 @@ import 'package:solid_auth_example/models/Constants.dart';
 
 // ignore: must_be_immutable
 class PrivateScreen extends StatelessWidget {
-  SolidAuth solidAuth; // Authentication data
+  SolidOidcAuth solidAuth; // Authentication data
 
   PrivateScreen({Key? key, required this.solidAuth}) : super(key: key);
 

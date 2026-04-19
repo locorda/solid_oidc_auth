@@ -1,10 +1,10 @@
 # DPoP Token Generation in Worker Threads
 
-This document describes the worker thread support for DPoP token generation in SolidAuth.
+This document describes the worker thread support for DPoP token generation in SolidOidcAuth.
 
 ## Overview
 
-SolidAuth supports generating DPoP tokens in Dart isolates or web workers through the `DpopCredentials` API. This enables:
+SolidOidcAuth supports generating DPoP tokens in Dart isolates or web workers through the `DpopCredentials` API. This enables:
 
 - Parallel DPoP token generation
 - Offloading token generation from the main thread
@@ -15,7 +15,7 @@ SolidAuth supports generating DPoP tokens in Dart isolates or web workers throug
 ### Exporting Credentials
 
 ```dart
-final solidAuth = SolidAuth(/* ... */);
+final solidAuth = SolidOidcAuth(/* ... */);
 await solidAuth.authenticate('https://alice.pod.com/profile/card#me');
 
 // Export credentials for worker thread

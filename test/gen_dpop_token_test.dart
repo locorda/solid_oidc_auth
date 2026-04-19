@@ -78,7 +78,8 @@ void main() {
       expect(
         payload.containsKey('iat'),
         isTrue,
-        reason: 'RFC 9449 §4.2 requires iat; dart_jsonwebtoken injects it automatically during JWT.sign()',
+        reason:
+            'RFC 9449 §4.2 requires iat; dart_jsonwebtoken injects it automatically during JWT.sign()',
       );
     });
 
@@ -107,7 +108,8 @@ void main() {
     test('jti is unique across two tokens for the same URL', () {
       final token2 = genDpopToken(url, keyPair, _testPublicKeyJwk, method);
       final jti1 = payload['jti'] as String;
-      final jti2 = (JWT.decode(token2).payload as Map<String, dynamic>)['jti'] as String;
+      final jti2 =
+          (JWT.decode(token2).payload as Map<String, dynamic>)['jti'] as String;
       expect(jti1, isNot(equals(jti2)));
     });
 

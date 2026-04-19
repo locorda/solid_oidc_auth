@@ -1032,7 +1032,8 @@ class SolidOidcAuth {
   /// - RSA key pair is not initialized
   DpopCredentials exportDpopCredentials() {
     if (_manager == null) {
-      throw Exception('SolidOidcAuth not initialized. Call authenticate() first.');
+      throw Exception(
+          'SolidOidcAuth not initialized. Call authenticate() first.');
     }
     return _manager!.exportDpopCredentials();
   }

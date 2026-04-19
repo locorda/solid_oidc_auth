@@ -335,6 +335,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  locorda_rdf_core:
+    dependency: transitive
+    description:
+      name: locorda_rdf_core
+      sha256: ad982245a91ac96da84c1516a23fadfdd017856982bee7958f9c068f943acf90
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.1"
   logging:
     dependency: transitive
     description:

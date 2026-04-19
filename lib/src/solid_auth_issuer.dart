@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:locorda_rdf_core/core.dart';
 
-const _solidOidcIssuer =
-    'http://www.w3.org/ns/solid/terms#oidcIssuer';
+const _solidOidcIssuer = 'http://www.w3.org/ns/solid/terms#oidcIssuer';
 
 /// Extracts the `solid:oidcIssuer` from a WebID profile document, or returns
 /// the input URI unchanged when it does not look like a WebID profile URL.

@@ -144,6 +144,33 @@ void main() {
     test('ath claim is absent when no accessToken is provided', () {
       expect(payload.containsKey('ath'), isFalse);
     });
+
+    // RFC 9449 §4.2: htu MUST NOT include query or fragment components.
+    test('htu strips query parameters from the URL', () {
+      const urlWithQuery =
+          'https://example.solidcommunity.net/profile/card?v=1&format=turtle';
+      final t = genDpopToken(urlWithQuery, keyPair, _testPublicKeyJwk, 'GET');
+      final p = JWT.decode(t).payload as Map<String, dynamic>;
+      expect(
+          p['htu'], equals('https://example.solidcommunity.net/profile/card'));
+    });
+
+    test('htu strips fragment from the URL', () {
+      const urlWithFragment =
+          'https://example.solidcommunity.net/profile/card#me';
+      final t =
+          genDpopToken(urlWithFragment, keyPair, _testPublicKeyJwk, 'GET');
+      final p = JWT.decode(t).payload as Map<String, dynamic>;
+      expect(
+          p['htu'], equals('https://example.solidcommunity.net/profile/card'));
+    });
+
+    test('htu strips both query and fragment', () {
+      const urlFull = 'https://example.solidcommunity.net/data?page=2#section';
+      final t = genDpopToken(urlFull, keyPair, _testPublicKeyJwk, 'GET');
+      final p = JWT.decode(t).payload as Map<String, dynamic>;
+      expect(p['htu'], equals('https://example.solidcommunity.net/data'));
+    });
   });
 
   group('genDpopToken — ath claim (RFC 9449 §4.2)', () {

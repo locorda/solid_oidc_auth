@@ -71,6 +71,13 @@ void main() {
       expect(result, equals([Uri.parse('https://solidcommunity.net')]));
     });
 
+    test('treats URL without fragment as direct issuer, not WebID', () async {
+      // A URL without a fragment must be treated as a direct issuer URI —
+      // no HTTP fetch should occur.
+      final result = await getIssuers('https://solidcommunity.net/auth');
+      expect(result, equals([Uri.parse('https://solidcommunity.net/auth')]));
+    });
+
     test('throws ArgumentError for a URI without scheme', () async {
       expect(
         () => getIssuers('solidcommunity.net'),
@@ -164,6 +171,24 @@ void main() {
         getIssuerUris(nTriples, webId, contentType: 'application/n-triples'),
         equals([issuer]),
       );
+    });
+
+    test('detects WebID by fragment — non-standard URL pattern', () async {
+      // WebIDs like https://id.example.com/alice#me must also trigger a
+      // profile fetch, not be silently treated as a direct issuer URI.
+      const nonStandardWebId = 'https://id.example.com/alice#me';
+      final turtle = '''
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+<$nonStandardWebId> solid:oidcIssuer <https://auth.example.com> .
+''';
+      final client = MockClient((request) async {
+        expect(request.url.toString(), equals(nonStandardWebId));
+        return http.Response(turtle, 200,
+            headers: {'content-type': 'text/turtle'});
+      });
+
+      final result = await getIssuers(nonStandardWebId, httpClient: client);
+      expect(result, equals([Uri.parse('https://auth.example.com')]));
     });
 
     test('getIssuerUris accepts injected RdfCore with custom TurtleCodec', () {

@@ -1,132 +1,56 @@
 ## [0.2.0]
 
+This is a ground-up rewrite by [Locorda](https://locorda.dev), forked from
+[anusii/solid_auth](https://github.com/anusii/solid_auth). The history of the
+original package is preserved in [CHANGELOG_INHERITED.md](CHANGELOG_INHERITED.md).
+
 ### Breaking Changes
+
 * Package renamed from `solid_auth` to `solid_oidc_auth`
-* Main class renamed from `SolidAuth` to `SolidOidcAuth`
-* `SolidAuthSettings` renamed to `SolidOidcAuthSettings`
-* `SolidAuthUriSettings` renamed to `SolidOidcAuthUriSettings`
-* Entry point changed from `package:solid_auth/solid_auth.dart` to `package:solid_oidc_auth/solid_oidc_auth.dart`
-* Worker entry point changed from `package:solid_auth/worker.dart` to `package:solid_oidc_auth/worker.dart`
+* Entry point changed to `package:solid_oidc_auth/solid_oidc_auth.dart`
+* Worker entry point introduced as `package:solid_oidc_auth/worker.dart`
+* Completely new public API — `SolidOidcAuth`, `SolidOidcAuthSettings`,
+  `SolidOidcAuthUriSettings` replace the old `authenticate()` / `getIssuer()` /
+  `genDpopToken()` top-level functions
+* Authentication now requires a [Public Client Identifier Document](https://solid.github.io/solid-oidc/#clientids-document)
+  (client-profile.jsonld) instead of a loopback redirect URI
 * Minimum SDK constraint tightened to `>=3.0.0`
 
-### Changes
-* Replaced embedded `dart_jsonwebtoken` copy with upstream `dart_jsonwebtoken ^3.3.2` dependency
-* Removed `collection` dependency (was only used by embedded JWT code)
-* DPoP token `iat` claim now set by upstream `dart_jsonwebtoken` (functionally identical, UTC-based)
+### Architecture
 
-## [0.1.27 20250626]
-* Repair pointycastle dependency
+* Replaced all embedded source copies (`openid_client`, `dart_jsonwebtoken`,
+  `pointycastle`) with upstream dependencies
+* OIDC layer now built on the certified [`oidc`](https://pub.dev/packages/oidc)
+  package by BdayaDev, which handles token lifecycle, refresh, and secure storage
+* RSA key management decoupled behind `RsaApi` interface; backed by
+  [`fast_rsa`](https://pub.dev/packages/fast_rsa) for native platforms and a
+  pure-Dart fallback for web/isolates
+* WebID-to-issuer resolution extracted into a standalone, testable
+  `SolidAuthIssuer` component (RDF-based, via `locorda_rdf_core`)
+* `DpopCredentials` value object provides serialisable, exportable credentials
+  for use from web workers / isolates
 
-## [0.1.26 20250626]
-* Update dependencies
+### Security
 
-## [0.1.25 20250613]
-* Error fix when cancelling the authentication process
-* Update intl package
+* Loopback redirect (localhost) authentication is no longer supported or
+  endorsed — uses the Solid-OIDC Client Identifier Document mechanism instead
+* DPoP tokens now comply with RFC 9449 §4.2: `htu` claim supported
+* WebID detection based on URI fragment (not `profile/card#me` string match),
+  covering all spec-compliant WebID patterns
+* HTTPS enforced for all non-localhost WebID profile fetches
 
-## [0.1.24 20250430]
+### Other Changes
 
-* Update and cleanup dependencies
-* intl to >=0.19.0
-* Remove overrides
+* Reactive authentication state via `ValueListenable<bool> isAuthenticatedNotifier`
+* Session persistence: RSA key pair and authentication parameters survive app
+  restarts without re-authentication
+* `worker.dart` entry point for Flutter-free use in web workers / Dart isolates
+* Removed `collection`, `url_launcher`, `flutter_web_auth_2`, `jose`,
+  `openid_client`, `pointycastle`, `intl` dependencies
+* Added `oidc`, `oidc_default_store`, `locorda_rdf_core`, `fast_rsa`,
+  `dart_jsonwebtoken`, `logging`, `meta` dependencies
 
-## [0.1.23 20250427]
+---
 
-* Update dependencies
-
-## 0.1.22
-
-* Url launcher code update for Android authentication
-
-## 0.1.21
-
-* Fix dart formatting issues
-
-## 0.1.20
-
-* Fix dart formatting issues
-
-## 0.1.19
-
-* Fix lint issues
-* Support up-to-date dependencies
-
-## 0.1.18
-
-* Update `uuid` package version
-
-## 0.1.17
-
-* Inlcude `DPoP` token in refresh token request
-
-## 0.1.16
-
-* Inlcude `DPoP` token in token request
-
-## 0.1.15
-
-* Getting `refresh_token` using OIDC flow
-
-## 0.1.14
-
-* Change `intl` package version to latest
-
-## 0.1.13
-
-* Update the supported platforms
-
-## 0.1.12
-
-* Update http package to the latest version
-
-## 0.1.11
-
-* Web version callback uri bug fix
-
-## 0.1.10
-
-* Changes to the Android side of the authentication
-
-## 0.1.9
-
-* Changes to the Android side of the authentication
-
-## 0.1.8
-
-* Fix package version dependency issue
-
-## 0.1.7
-
-* closeWebView only for mobile (Android and ios)
-* Authentication now works with localhost
-
-## 0.1.6
-
-* Removing closeWebView for windows
-
-## 0.1.5
-
-* Bug fix on web authentication
-
-## 0.1.4
-
-* Package updated to null safety
-
-## 0.1.3
-
-* Community Solid Server (CSS) 3.0 redirect URL bug fix
-
-## 0.1.2
-
-* Updates to the package to be compatible with Community Solid Server (CSS) 3.0
-* Updates to the example project in main repository
-
-## 0.1.1
-
-* Bug fix on web support
-* Updated documentation
-* Example project added to main repository
-
-## 0.1.0
-
-Initial version of the package
+*For the history of the original `solid_auth` package (≤ 0.1.27),
+see [CHANGELOG_INHERITED.md](CHANGELOG_INHERITED.md).*

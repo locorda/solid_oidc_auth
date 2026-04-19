@@ -637,10 +637,14 @@ class SolidOidcAuth {
   /// or invalid, it will be cleared and the method will return `false` rather
   /// than throwing an exception.
   ///
-  /// ## Thread Safety
+  /// ## Re-initialisation
   ///
-  /// This method is safe to call multiple times, though subsequent calls after
-  /// the first will have no effect.
+  /// Calling [init] while a session is active disposes the existing manager
+  /// (releasing resources) **without** performing a server-side logout. The
+  /// user will remain authenticated at the identity provider and any stored
+  /// tokens are kept, so a subsequent [init] can restore the session. If you
+  /// want to fully log the user out before re-initialising, call [logout]
+  /// first.
   Future<bool> init() async {
     if (_manager != null) {
       await _manager!.dispose();
@@ -1094,8 +1098,8 @@ class SolidOidcAuth {
   /// - RSA key pair is not initialized
   DpopCredentials exportDpopCredentials() {
     if (_manager == null) {
-      throw Exception(
-          'SolidOidcAuth not initialized. Call authenticate() first.');
+      throw StateError(
+          'SolidOidcAuth is not authenticated. Call authenticate() first.');
     }
     return _manager!.exportDpopCredentials();
   }

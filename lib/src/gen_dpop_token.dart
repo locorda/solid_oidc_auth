@@ -70,8 +70,17 @@ String genDpopToken(
   /// https://datatracker.ietf.org/doc/html/rfc7519
   var tokenHead = {"alg": "RS256", "typ": "dpop+jwt", "jwk": publicKeyJwk};
 
+  // RFC 9449 §4.2: htu MUST NOT include query or fragment components.
+  final parsedUrl = Uri.parse(endPointUrl);
+  final htu = Uri(
+    scheme: parsedUrl.scheme,
+    host: parsedUrl.host,
+    port: parsedUrl.hasPort ? parsedUrl.port : null,
+    path: parsedUrl.path,
+  ).toString();
+
   var tokenBody = <String, dynamic>{
-    "htu": endPointUrl,
+    "htu": htu,
     "htm": httpMethod,
     "jti": tokenId,
   };

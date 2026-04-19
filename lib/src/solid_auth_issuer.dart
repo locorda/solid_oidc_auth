@@ -16,6 +16,12 @@ const _profileAcceptHeader = 'text/turtle, application/n-triples;q=0.9';
 /// wraps the input URI in a single-element list when it does not look like a
 /// WebID profile URL.
 ///
+/// A URL is treated as a WebID profile when it is an HTTPS URL containing a
+/// fragment identifier (`#`). This covers the Community Solid Server convention
+/// (`/profile/card#me`) as well as any other WebID URL pattern
+/// (`/webid#alice`, `/people/alice#me`, etc.). URLs without a fragment are
+/// treated as direct issuer URIs.
+///
 /// An optional [rdfCore] instance customises parsing — e.g. non-standard
 /// Turtle flags via [RdfCore.withCodecs], or JSON-LD support by registering
 /// `locorda_rdf_jsonld` codecs. Defaults to the standard [rdf] global.
@@ -27,7 +33,8 @@ Future<List<Uri>> getIssuers(
   http.Client? httpClient,
   RdfCore? rdfCore,
 }) async {
-  if (textUrl.contains('profile/card#me')) {
+  final uri = Uri.tryParse(textUrl);
+  if (uri != null && uri.hasFragment) {
     _assertSecureUrl(textUrl);
     final result = await _fetchRaw(textUrl, httpClient: httpClient);
     return getIssuerUris(
@@ -39,7 +46,6 @@ Future<List<Uri>> getIssuers(
   }
 
   // Treat the input as a direct issuer URI — validate it is a usable absolute URI.
-  final uri = Uri.tryParse(textUrl);
   if (uri == null || !uri.hasScheme) {
     throw ArgumentError('Invalid issuer URI: $textUrl');
   }

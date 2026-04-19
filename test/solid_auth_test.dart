@@ -27,10 +27,10 @@ void main() {
         );
       });
 
-      test('exportDpopCredentials throws Exception', () {
+      test('exportDpopCredentials throws StateError', () {
         expect(
           () => solidAuth.exportDpopCredentials(),
-          throwsA(isA<Exception>()),
+          throwsA(isA<StateError>()),
         );
       });
 

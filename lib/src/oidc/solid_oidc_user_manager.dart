@@ -779,6 +779,14 @@ class SolidOidcUserManager {
   /// - Network requests are made to discover provider configuration
   /// - Cryptographic key generation may occur on first use
   /// - Existing sessions are validated against current provider settings
+  ///
+  /// ## Re-initialisation
+  ///
+  /// If [init] is called while a session is already active, [logout] is
+  /// invoked on the existing manager before the new one is created. This
+  /// performs a clean server-side logout and clears all persisted tokens,
+  /// including the DPoP RSA key pair. If you only want to release resources
+  /// without logging the user out, call [dispose] first.
   Future<void> init() async {
     if (_manager != null) {
       await logout();
@@ -1322,7 +1330,11 @@ class SolidOidcUserManager {
         );
       }
     } catch (e) {
-      _log.warning('Failed to load persisted RSA info: $e');
+      _log.severe(
+          'Persisted RSA info is corrupt or unreadable — discarding: $e');
+      // Remove the corrupt entry so the next init generates a fresh key pair
+      // rather than failing again on every restart.
+      await _clearPersistedRsaInfo();
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:locorda_rdf_core/core.dart';
 import 'package:logging/logging.dart';
 import 'package:oidc/oidc.dart';
 import 'package:solid_oidc_auth/src/rsa/rsa_api.dart';
@@ -155,15 +156,6 @@ typedef CalculateEffectivePrompts = List<String> Function(
   List<String> configuredPrompts,
   List<String> effectiveScopes,
 );
-
-Future<List<Uri>> _getIssuersDefault(String webIdOrIssuer) async {
-  try {
-    return [Uri.parse(await solid_auth_issuer.getIssuer(webIdOrIssuer))];
-  } catch (e) {
-    // If loading the profile fails, return the input as is
-    return [Uri.parse(webIdOrIssuer)];
-  }
-}
 
 /// Internal storage for RSA key pair used in DPoP token generation.
 ///
@@ -621,6 +613,7 @@ class SolidOidcUserManagerSettings {
 /// - All tokens are stored using platform-appropriate secure storage
 class SolidOidcUserManager {
   Uri? _issuerUri;
+
   OidcUserManager? _manager;
 
   /// The WebID or issuer URL used for authentication discovery.
@@ -645,6 +638,8 @@ class SolidOidcUserManager {
   /// If not provided, a default HTTP client will be used. Custom clients
   /// can be provided for proxy support, custom headers, or request monitoring.
   final http.Client? _httpClient;
+
+  final RdfCore? _rdfCore;
 
   final String _clientId;
 
@@ -697,12 +692,14 @@ class SolidOidcUserManager {
     required SolidOidcUserManagerSettings settings,
     String? id,
     http.Client? httpClient,
+    RdfCore? rdfCore,
     JsonWebKeyStore? keyStore,
   })  : _settings = settings,
         _webIdOrIssuer = webIdOrIssuer,
         _id = id,
         _keyStore = keyStore,
         _httpClient = httpClient,
+        _rdfCore = rdfCore,
         _clientId = clientId;
 
   /// The currently authenticated OIDC user, or `null` if not authenticated.
@@ -727,6 +724,19 @@ class SolidOidcUserManager {
   ///
   /// Example: `'https://alice.solidcommunity.net/profile/card#me'`
   String? get currentWebId => _currentWebId;
+
+  /// Resolves [webIdOrIssuer] to a list of issuer URIs using either the custom
+  /// [SolidOidcUserManagerSettings.getIssuers] callback or the default
+  /// [solid_auth_issuer.getIssuers] implementation.
+  ///
+  /// Centralising the call here ensures that [_httpClient] is threaded
+  /// through to the default resolver for testability.
+  Future<List<Uri>> _resolveIssuers(String webIdOrIssuer) {
+    final custom = _settings.getIssuers;
+    if (custom != null) return custom(webIdOrIssuer);
+    return solid_auth_issuer.getIssuers(webIdOrIssuer,
+        httpClient: _httpClient, rdfCore: _rdfCore);
+  }
 
   /// Initializes the user manager and attempts to restore any existing session.
   ///
@@ -769,8 +779,7 @@ class SolidOidcUserManager {
       await logout();
     }
 
-    final issuerUris =
-        await (_settings.getIssuers ?? _getIssuersDefault)(_webIdOrIssuer);
+    final issuerUris = await _resolveIssuers(_webIdOrIssuer);
     _issuerUri = issuerUris.first;
     Uri wellKnownUri = OidcUtils.getOpenIdConfigWellKnownUri(_issuerUri!);
 
@@ -1015,17 +1024,17 @@ class SolidOidcUserManager {
     // Extract WebID from the OIDC token using the Solid-OIDC spec methods
     final webId = _extractWebIdFromOidcUser(oidcUser);
 
-    // extra security check: retrieve the profile and ensure that the
-    // issuer really is allowed by this webID
-    final issuerUris = (await (_settings.getIssuers ?? _getIssuersDefault)(
-      webId,
-    ))
-        .map(_normalizeUri)
-        .toSet();
+    // Solid-OIDC compliance: the iss claim of the token (= _issuerUri) MUST be
+    // listed as a solid:oidcIssuer in the WebID profile. Checking only the
+    // specific issuer we authenticated with prevents a weaker issuer listed in
+    // an unrelated profile from satisfying the check.
+    final profileIssuers =
+        (await _resolveIssuers(webId)).map(_normalizeUri).toSet();
     final normalizedIssuerUri = _normalizeUri(_issuerUri!);
-    if (!issuerUris.contains(normalizedIssuerUri)) {
+    if (!profileIssuers.contains(normalizedIssuerUri)) {
       throw Exception(
-        'No valid issuer found for WebID: $webId . Expected: $normalizedIssuerUri but got: $issuerUris',
+        'Issuer $normalizedIssuerUri is not listed as solid:oidcIssuer '
+        'in WebID profile $webId. Profile allows: $profileIssuers',
       );
     }
     return webId;

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:locorda_rdf_core/core.dart';
 import 'package:logging/logging.dart';
 import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
@@ -378,6 +380,23 @@ class SolidOidcAuth {
   final String _oidcClientId;
   final SolidOidcAuthSettings _settings;
   final SolidOidcAuthUriSettings _uriSettings;
+
+  /// Custom HTTP client used for all network I/O: WebID profile fetching,
+  /// OIDC discovery, token exchange, UserInfo, and JWKS requests.
+  ///
+  /// When `null` the default platform HTTP client is used. Supply a custom
+  /// client to add proxy support, intercept/log requests, pin TLS certificates,
+  /// or inject mock responses in tests.
+  final http.Client? _httpClient;
+
+  /// Custom RDF codec registry used when decoding WebID profile documents.
+  ///
+  /// When `null` the global [rdf] instance is used, which supports Turtle and
+  /// N-Triples out of the box. Supply a custom [RdfCore.withCodecs] instance
+  /// to register additional codecs (e.g. JSON-LD) or override default parser
+  /// options.
+  final RdfCore? _rdfCore;
+
   // Storage keys for persisting authentication parameters
   static const String _webIdOrIssuerKey = 'solid_auth_webid_or_issuer';
   static const String _scopesKey = 'solid_auth_scopes';
@@ -457,19 +476,33 @@ class SolidOidcAuth {
   ///
   /// Additional scopes (like `profile`, `email`, etc.) can be included in the client
   /// profile and requested during authentication via the `scopes` parameter in [authenticate].
+  ///
+  /// - [httpClient]: Optional HTTP client used for **all** network I/O — WebID
+  ///   profile fetching, OIDC discovery, token exchange, UserInfo, and JWKS
+  ///   endpoints. Defaults to the platform HTTP client. Provide a custom client
+  ///   for proxy support, TLS pinning, request logging, or test mocking.
+  ///
+  /// - [rdfCore]: Optional RDF codec registry for parsing WebID profile
+  ///   documents. Defaults to the global [rdf] instance (Turtle + N-Triples).
+  ///   Provide a [RdfCore.withCodecs] instance to support additional formats
+  ///   such as JSON-LD.
   SolidOidcAuth({
     required String oidcClientId,
     required String appUrlScheme,
     required Uri frontendRedirectUrl,
     SolidOidcAuthSettings? settings,
     OidcStore? store,
+    http.Client? httpClient,
+    RdfCore? rdfCore,
   })  : _oidcClientId = oidcClientId,
         _settings = settings ?? const SolidOidcAuthSettings(),
         _uriSettings = SolidOidcAuth.createUriSettings(
           appUrlScheme: appUrlScheme,
           frontendRedirectUrl: frontendRedirectUrl,
         ),
-        _store = store ?? OidcDefaultStore();
+        _store = store ?? OidcDefaultStore(),
+        _httpClient = httpClient,
+        _rdfCore = rdfCore;
 
   /// Creates a SolidOidcAuth instance with explicit redirect URI configuration.
   ///
@@ -483,6 +516,14 @@ class SolidOidcAuth {
   /// - [uriSettings]: Explicit configuration of all redirect URIs
   /// - [settings]: Optional advanced configuration settings
   /// - [store]: Optional custom storage implementation
+  /// - [httpClient]: Optional HTTP client used for **all** network I/O — WebID
+  ///   profile fetching, OIDC discovery, token exchange, UserInfo, and JWKS
+  ///   endpoints. Defaults to the platform HTTP client. Provide a custom client
+  ///   for proxy support, TLS pinning, request logging, or test mocking.
+  /// - [rdfCore]: Optional RDF codec registry for parsing WebID profile
+  ///   documents. Defaults to the global [rdf] instance (Turtle + N-Triples).
+  ///   Provide a [RdfCore.withCodecs] instance to support additional formats
+  ///   such as JSON-LD.
   ///
   /// ## Example
   /// ```dart
@@ -502,9 +543,13 @@ class SolidOidcAuth {
     required SolidOidcAuthUriSettings uriSettings,
     SolidOidcAuthSettings? settings,
     OidcStore? store,
+    http.Client? httpClient,
+    RdfCore? rdfCore,
   })  : _oidcClientId = oidcClientId,
         _settings = settings ?? const SolidOidcAuthSettings(),
         _store = store ?? OidcDefaultStore(),
+        _httpClient = httpClient,
+        _rdfCore = rdfCore,
         _uriSettings = uriSettings;
 
   /// The WebID of the currently authenticated user, if any.
@@ -597,6 +642,10 @@ class SolidOidcAuth {
   /// This method is safe to call multiple times, though subsequent calls after
   /// the first will have no effect.
   Future<bool> init() async {
+    if (_manager != null) {
+      await _manager!.dispose();
+      _manager = null;
+    }
     await _store.init();
 
     // Try to restore authentication parameters from storage
@@ -868,39 +917,51 @@ class SolidOidcAuth {
         clientId: _oidcClientId,
         webIdOrIssuer: webIdOrIssuerUri,
         store: _store,
-        settings: SolidOidcUserManagerSettings(
-          redirectUri: _uriSettings.redirectUri,
-          postLogoutRedirectUri: _uriSettings.postLogoutRedirectUri,
-          frontChannelLogoutUri: _uriSettings.frontChannelLogoutUri,
-          frontChannelRequestListeningOptions:
-              _uriSettings.frontChannelRequestListeningOptions,
-          acrValues: _settings.acrValues,
-          display: _settings.display,
-          expiryTolerance: _settings.expiryTolerance,
-          extraAuthenticationParameters:
-              _settings.extraAuthenticationParameters,
-          extraRevocationHeaders: _settings.extraRevocationHeaders,
-          extraRevocationParameters: _settings.extraRevocationParameters,
-          extraScopes: scopes,
-          extraTokenHeaders: _settings.extraTokenHeaders,
-          extraTokenParameters: _settings.extraTokenParameters,
-          getExpiresIn: _settings.getExpiresIn,
-          getIdToken: _settings.getIdToken,
-          getIssuers: _settings.getIssuers,
-          hooks: _settings.hooks,
-          maxAge: _settings.maxAge,
-          options: _settings.options,
-          prompt: _settings.prompt,
-          refreshBefore: _settings.refreshBefore,
-          sessionManagementSettings: _settings.sessionManagementSettings,
-          strictJwtVerification: _settings.strictJwtVerification,
-          supportOfflineAuth: _settings.supportOfflineAuth,
-          userInfoSettings: _settings.userInfoSettings,
-          uiLocales: _settings.uiLocales,
-        ));
+        httpClient: _httpClient,
+        rdfCore: _rdfCore,
+        settings: _buildUserManagerSettings(extraScopes: scopes));
 
     await manager.init();
     return manager;
+  }
+
+  /// Translates [SolidOidcAuthSettings] + [SolidOidcAuthUriSettings] into the
+  /// [SolidOidcUserManagerSettings] expected by the lower-level manager.
+  ///
+  /// Centralising the mapping here ensures that new fields only need to be
+  /// added in two places (the public settings class and this method) rather
+  /// than three.
+  SolidOidcUserManagerSettings _buildUserManagerSettings(
+      {required List<String> extraScopes}) {
+    return SolidOidcUserManagerSettings(
+      redirectUri: _uriSettings.redirectUri,
+      postLogoutRedirectUri: _uriSettings.postLogoutRedirectUri,
+      frontChannelLogoutUri: _uriSettings.frontChannelLogoutUri,
+      frontChannelRequestListeningOptions:
+          _uriSettings.frontChannelRequestListeningOptions,
+      acrValues: _settings.acrValues,
+      display: _settings.display,
+      expiryTolerance: _settings.expiryTolerance,
+      extraAuthenticationParameters: _settings.extraAuthenticationParameters,
+      extraRevocationHeaders: _settings.extraRevocationHeaders,
+      extraRevocationParameters: _settings.extraRevocationParameters,
+      extraScopes: extraScopes,
+      extraTokenHeaders: _settings.extraTokenHeaders,
+      extraTokenParameters: _settings.extraTokenParameters,
+      getExpiresIn: _settings.getExpiresIn,
+      getIdToken: _settings.getIdToken,
+      getIssuers: _settings.getIssuers,
+      hooks: _settings.hooks,
+      maxAge: _settings.maxAge,
+      options: _settings.options,
+      prompt: _settings.prompt,
+      refreshBefore: _settings.refreshBefore,
+      sessionManagementSettings: _settings.sessionManagementSettings,
+      strictJwtVerification: _settings.strictJwtVerification,
+      supportOfflineAuth: _settings.supportOfflineAuth,
+      userInfoSettings: _settings.userInfoSettings,
+      uiLocales: _settings.uiLocales,
+    );
   }
 
   /// Generates a DPoP (Demonstration of Proof-of-Possession) token for API requests.
@@ -967,6 +1028,10 @@ class SolidOidcAuth {
   ///
   /// Throws an exception if no user is currently authenticated.
   DPoP genDpopToken(String url, String method) {
+    if (_manager == null) {
+      throw StateError(
+          'SolidOidcAuth is not authenticated. Call authenticate() first.');
+    }
     return _manager!.genDpopToken(url, method);
   }
 

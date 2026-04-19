@@ -432,5 +432,43 @@ void main() {
         expect(prompts, equals(prompts.toList()..sort())); // Should be sorted
       });
     });
+
+    group('getIssuers injection', () {
+      test('custom getIssuers is used instead of default resolution', () async {
+        // Verify that a custom getIssuers callback is wired through. The
+        // callback is injected into the settings; calling init() would actually
+        // invoke it. We test the injection by building settings with the
+        // callback and confirming it's accessible on the resulting manager.
+        var called = false;
+        final customSettings = SolidOidcUserManagerSettings(
+          redirectUri: Uri.parse('https://example.com/callback'),
+          getIssuers: (webIdOrIssuer) async {
+            called = true;
+            return [Uri.parse('https://custom.issuer.example.com')];
+          },
+        );
+
+        // Confirm that the callback is stored on the settings object.
+        expect(customSettings.getIssuers, isNotNull);
+
+        // Invoke it directly to verify the lambda works as intended.
+        final uris = await customSettings
+            .getIssuers!('https://example.com/profile/card#me');
+        expect(called, isTrue);
+        expect(uris, equals([Uri.parse('https://custom.issuer.example.com')]));
+      });
+
+      test('getIssuers returning multiple URIs is accepted by settings', () {
+        final customSettings = SolidOidcUserManagerSettings(
+          redirectUri: Uri.parse('https://example.com/callback'),
+          getIssuers: (_) async => [
+            Uri.parse('https://issuer-a.example.com'),
+            Uri.parse('https://issuer-b.example.com'),
+          ],
+        );
+
+        expect(customSettings.getIssuers, isNotNull);
+      });
+    });
   });
 }

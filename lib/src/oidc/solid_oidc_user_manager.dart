@@ -657,8 +657,10 @@ class SolidOidcUserManager {
 
   String? _currentWebId;
 
-  // Storage keys for persisting SOLID-specific data
-  static const String _rsaInfoKey = 'solid_rsa_info';
+  // Storage key for persisting the RSA key pair. Incorporates _id so the key
+  // itself is isolated even when the OidcStore implementation ignores managerId.
+  String get _rsaInfoKey =>
+      _id != null ? 'solid_rsa_info_$_id' : 'solid_rsa_info';
 
   /// Creates a new [SolidOidcUserManager] instance.
   ///

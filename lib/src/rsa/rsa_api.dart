@@ -55,7 +55,7 @@ class GeneratedRsaKeyPair {
   /// This format is required for DPoP token headers according to
   /// [RFC 9449](https://datatracker.ietf.org/doc/html/rfc9449).
   /// The JWK includes the `alg: "RS256"` parameter.
-  final dynamic publicKeyJwk;
+  final Map<String, dynamic> publicKeyJwk;
 
   /// Creates a generation result with both PEM and JWK representations.
   const GeneratedRsaKeyPair({

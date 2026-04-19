@@ -57,12 +57,12 @@ class DpopCredentials {
   /// **Warning**: This is a bearer token that grants access to resources.
   final String accessToken;
 
-  const DpopCredentials({
+  DpopCredentials({
     required this.publicKey,
     required this.privateKey,
-    required this.publicKeyJwk,
+    required Map<String, dynamic> publicKeyJwk,
     required this.accessToken,
-  });
+  }) : publicKeyJwk = Map<String, dynamic>.unmodifiable(publicKeyJwk);
 
   /// Serializes the credentials to JSON for transfer to workers.
   ///
@@ -145,6 +145,7 @@ class DpopCredentials {
       rsaKeyPair,
       publicKeyJwk,
       method,
+      accessToken: accessToken,
     );
 
     return DPoP(dpopToken: dpopToken, accessToken: accessToken);

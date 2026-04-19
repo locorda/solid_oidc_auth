@@ -102,7 +102,7 @@
 ///
 /// See [doc/dpop_worker_threads.md](../doc/dpop_worker_threads.md) for
 /// comprehensive security guidelines.
-library solid_oidc_auth.worker;
+library;
 
 export 'src/rsa/rsa_api.dart' show KeyPair;
 export 'src/oidc/dpop_credentials.dart' show DpopCredentials, DPoP;

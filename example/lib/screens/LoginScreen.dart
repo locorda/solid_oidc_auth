@@ -86,8 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   margin: EdgeInsets.symmetric(
                     horizontal: screenWidth(context) < 1175
                         ? screenWidth(context) < 750
-                              ? screenWidth(context) * 0.05
-                              : screenWidth(context) * 0.25
+                            ? screenWidth(context) * 0.05
+                            : screenWidth(context) * 0.25
                         : screenWidth(context) * 0.05,
                   ),
                   child: SingleChildScrollView(
@@ -173,11 +173,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       PublicScreen(
-                                                        solidAuth:
-                                                            widget.solidAuth,
-                                                        webId: webIdController
-                                                            .text,
-                                                      ),
+                                                    solidAuth: widget.solidAuth,
+                                                    webId: webIdController.text,
+                                                  ),
                                                 ),
                                               );
                                             }
@@ -239,7 +237,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            // FIXME: I simplified this to always use solidcommunity.au - I hope this is fine?
             onPressed: () async => launchIssuerReg(defaultIssuerRegister),
             child: Text(
               'GET A POD',

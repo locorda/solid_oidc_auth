@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:locorda_rdf_core/core.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:oidc/oidc.dart';
 import 'package:solid_oidc_auth/src/rsa/rsa_api.dart';
 import 'package:solid_oidc_auth/src/gen_dpop_token.dart' as solid_auth_client;
@@ -11,6 +12,8 @@ import 'package:solid_oidc_auth/src/rsa/rsa_impl.dart';
 import 'dpop_credentials.dart';
 
 final _log = Logger("solid_authentication_oidc");
+
+Duration? _defaultRefreshBefore(OidcToken token) => const Duration(minutes: 1);
 
 /// Contains the authentication result with both OIDC user data and validated WebID.
 ///
@@ -164,7 +167,7 @@ typedef CalculateEffectivePrompts = List<String> Function(
 class _RsaInfo {
   final String pubKey;
   final String privKey;
-  final dynamic pubKeyJwk;
+  final Map<String, dynamic> pubKeyJwk;
 
   _RsaInfo({
     required this.pubKey,
@@ -261,7 +264,7 @@ class SolidOidcUserManagerSettings {
     this.userInfoSettings = const OidcUserInfoSettings(),
     this.frontChannelRequestListeningOptions =
         const OidcFrontChannelRequestListeningOptions(),
-    this.refreshBefore = defaultRefreshBefore,
+    this.refreshBefore = _defaultRefreshBefore,
     this.strictJwtVerification = true,
     this.getExpiresIn,
     this.sessionManagementSettings = const OidcSessionManagementSettings(),
@@ -814,9 +817,7 @@ class SolidOidcUserManager {
           request.tokenEndpoint.toString(),
           "POST",
         );
-        if (request.headers == null) {
-          request.headers = {};
-        }
+        request.headers ??= {};
         request.headers!['DPoP'] = dPopToken;
         return Future.value(request);
       },
@@ -883,6 +884,7 @@ class SolidOidcUserManager {
     }
   }
 
+  @visibleForTesting
   List<String> getEffectiveScopes() {
     return {
       // Use the configurable default scopes for this instance
@@ -927,6 +929,7 @@ class SolidOidcUserManager {
   ///
   /// Returns a list of prompt values to be sent to the identity provider
   /// during the authorization request.
+  @visibleForTesting
   List<String> getEffectivePrompts(List<String> scopes) {
     // Use custom function if provided
     if (_settings.calculateEffectivePrompts != null) {
@@ -986,17 +989,15 @@ class SolidOidcUserManager {
   /// ## Return Value
   ///
   /// Returns [UserAndWebId] containing both the OIDC user data and the
-  /// validated Solid WebID, or `null` if the user cancels authentication.
+  /// validated Solid WebID. Throws if authentication fails or is cancelled.
   ///
   /// ## Error Handling
   ///
   /// ```dart
   /// try {
   ///   final result = await manager.loginAuthorizationCodeFlow();
-  ///   if (result != null) {
-  ///     print('Authenticated as: ${result.webId}');
-  ///     print('Provider: ${result.user.claims.issuer}');
-  ///   }
+  ///   print('Authenticated as: ${result.webId}');
+  ///   print('Provider: ${result.oidcUser.claims.issuer}');
   /// } on OidcException catch (e) {
   ///   // Handle OIDC-specific errors (network, configuration, etc.)
   /// } on Exception catch (e) {
@@ -1010,7 +1011,7 @@ class SolidOidcUserManager {
   /// - RSA key pairs for DPoP token generation are automatically created and securely stored
   /// - All tokens are stored using platform-appropriate secure storage
   /// - Session state is automatically persisted for future app launches
-  Future<UserAndWebId?> loginAuthorizationCodeFlow() async {
+  Future<UserAndWebId> loginAuthorizationCodeFlow() async {
     final oidcUser = await _manager!.loginAuthorizationCodeFlow();
     if (oidcUser == null) {
       throw Exception('OIDC authentication failed: no user returned');
@@ -1055,7 +1056,7 @@ class SolidOidcUserManager {
     );
   }
 
-  String _genDpopToken(String url, String method) {
+  String _genDpopToken(String url, String method, {String? accessToken}) {
     if (_rsaInfo == null) {
       throw Exception('RSA key pair not generated. Call authenticate first.');
     }
@@ -1063,8 +1064,8 @@ class SolidOidcUserManager {
     final rsaKeyPair = KeyPair(_rsaInfo!.pubKey, _rsaInfo!.privKey);
     final publicKeyJwk = _rsaInfo!.pubKeyJwk;
 
-    return solid_auth_client.genDpopToken(
-        url, rsaKeyPair, publicKeyJwk, method);
+    return solid_auth_client.genDpopToken(url, rsaKeyPair, publicKeyJwk, method,
+        accessToken: accessToken);
   }
 
   /// Generates a DPoP (Demonstration of Proof-of-Possession) token for API requests.
@@ -1127,10 +1128,8 @@ class SolidOidcUserManager {
       throw Exception('No access token available for DPoP generation');
     }
 
-    final dpopToken = _genDpopToken(url, method);
-
-    // Get the access token from the current user
     final accessToken = _manager!.currentUser!.token.accessToken!;
+    final dpopToken = _genDpopToken(url, method, accessToken: accessToken);
 
     return DPoP(dpopToken: dpopToken, accessToken: accessToken);
   }
@@ -1319,7 +1318,7 @@ class SolidOidcUserManager {
         _rsaInfo = _RsaInfo(
           pubKey: data['pubKey'] as String,
           privKey: data['privKey'] as String,
-          pubKeyJwk: data['pubKeyJwk'],
+          pubKeyJwk: Map<String, dynamic>.from(data['pubKeyJwk'] as Map),
         );
       }
     } catch (e) {
@@ -1380,12 +1379,20 @@ class SolidOidcUserManager {
     );
   }
 
-  /// Validates if a string is a valid HTTP or HTTPS URI.
+  /// Validates if a string is a valid HTTP(S) URI suitable for a WebID.
+  ///
+  /// Accepts HTTPS unconditionally. HTTP is only accepted for localhost
+  /// addresses (localhost, 127.0.0.1, [::1]) to support local development.
   bool _isValidHttpUri(String uriString) {
     try {
       final uri = Uri.parse(uriString);
-      return (uri.scheme == 'http' || uri.scheme == 'https') &&
-          uri.host.isNotEmpty;
+      if (uri.host.isEmpty) return false;
+      if (uri.scheme == 'https') return true;
+      if (uri.scheme == 'http') {
+        final host = uri.host.toLowerCase();
+        return host == 'localhost' || host == '127.0.0.1' || host == '::1';
+      }
+      return false;
     } catch (e) {
       return false;
     }

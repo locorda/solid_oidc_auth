@@ -139,7 +139,7 @@ void _assertSecureUrl(String url) {
   if (uri.scheme == 'https') return;
   if (uri.scheme == 'http') {
     final host = uri.host.toLowerCase();
-    if (host == 'localhost' || host == '127.0.0.1' || host == '[::1]') return;
+    if (host == 'localhost' || host == '127.0.0.1' || host == '::1') return;
     throw ArgumentError(
       'Insecure HTTP is not permitted for non-local WebID profile URLs. '
       'Use HTTPS: $url',

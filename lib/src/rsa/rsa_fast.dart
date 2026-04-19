@@ -52,8 +52,8 @@ class RsaCryptoImpl implements RsaCrypto {
     final keyPair = await fast.RSA.generate(bits);
 
     // Convert public key to JWK format for DPoP token headers
-    final publicKeyJwk =
-        await fast.RSA.convertPublicKeyToJWK(keyPair.publicKey);
+    final publicKeyJwk = Map<String, dynamic>.from(
+        await fast.RSA.convertPublicKeyToJWK(keyPair.publicKey) as Map);
 
     // Return our platform-agnostic types with required algorithm parameter
     return GeneratedRsaKeyPair(

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:solid_oidc_auth/src/gen_dpop_token.dart';
@@ -135,6 +137,43 @@ void main() {
         final p = JWT.decode(t).payload as Map<String, dynamic>;
         expect(p['htm'], equals(httpMethod));
       }
+    });
+
+    // RFC 9449 §4.2: ath MUST NOT be present when no access token is provided
+    // (e.g. DPoP proofs for token endpoint requests).
+    test('ath claim is absent when no accessToken is provided', () {
+      expect(payload.containsKey('ath'), isFalse);
+    });
+  });
+
+  group('genDpopToken — ath claim (RFC 9449 §4.2)', () {
+    const url = 'https://example.solidcommunity.net/profile/card';
+    const method = 'GET';
+    const accessToken = 'SlAV32hkKG';
+    final keyPair = KeyPair(_testPublicKey, _testPrivateKey);
+
+    late Map<String, dynamic> payload;
+
+    setUpAll(() {
+      final token = genDpopToken(url, keyPair, _testPublicKeyJwk, method,
+          accessToken: accessToken);
+      payload = JWT.decode(token).payload as Map<String, dynamic>;
+    });
+
+    test('ath claim is present when accessToken is provided', () {
+      expect(payload.containsKey('ath'), isTrue);
+    });
+
+    test('ath is base64url(SHA-256(ASCII(accessToken))) without padding', () {
+      final expectedHash = sha256.convert(ascii.encode(accessToken));
+      final expectedAth =
+          base64Url.encode(expectedHash.bytes).replaceAll('=', '');
+      expect(payload['ath'], equals(expectedAth));
+    });
+
+    test('ath value has no padding characters', () {
+      final ath = payload['ath'] as String;
+      expect(ath, isNot(contains('=')));
     });
   });
 }

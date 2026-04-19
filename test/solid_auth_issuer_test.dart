@@ -215,6 +215,20 @@ void main() {
       );
     });
 
+    test('allows HTTP IPv6 loopback WebID', () async {
+      const turtle = '''
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+<http://[::1]:3000/profile/card#me> solid:oidcIssuer <http://[::1]:3000> .
+''';
+      final client = MockClient((_) async => http.Response(turtle, 200));
+      final issuers = await getIssuers('http://[::1]:3000/profile/card#me',
+          httpClient: client);
+      expect(
+        issuers.map((uri) => uri.toString()).toList(),
+        equals(['http://[::1]:3000']),
+      );
+    });
+
     test('rejects HTTP non-localhost WebID', () async {
       expect(
         () => getIssuers('http://alice.example.com/profile/card#me'),

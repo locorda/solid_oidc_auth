@@ -16,7 +16,7 @@ export 'package:solid_oidc_auth/src/oidc/dpop_credentials.dart'
 /// The default refresh behavior: refresh tokens 1 minute before they expire.
 ///
 /// This matches the default behavior from the underlying OIDC library.
-Duration? defaultRefreshBefore(OidcToken token) {
+Duration? _defaultRefreshBefore(OidcToken token) {
   return const Duration(minutes: 1);
 }
 
@@ -60,7 +60,7 @@ class SolidOidcAuthSettings {
     this.extraTokenParameters,
     this.options,
     this.userInfoSettings = const OidcUserInfoSettings(),
-    this.refreshBefore = defaultRefreshBefore,
+    this.refreshBefore = _defaultRefreshBefore,
     this.strictJwtVerification = true,
     this.getExpiresIn,
     this.sessionManagementSettings = const OidcSessionManagementSettings(),
@@ -463,7 +463,7 @@ class SolidOidcAuth {
   ///     "com.mycompany.myapp://logout"
   ///   ],
   ///   "grant_types": ["authorization_code", "refresh_token"],
-  ///   "scope": "openid webid offline_access profile"
+  ///   "scope": "openid webid offline_access"
   /// }
   /// ```
   ///
@@ -803,9 +803,6 @@ class SolidOidcAuth {
         "Beginning full authentication flow for WebID: $webIdOrIssuerUri");
     // No existing session, perform full authentication flow
     final authResult = await _manager!.loginAuthorizationCodeFlow();
-    if (authResult == null) {
-      throw Exception('OIDC authentication failed: no user returned');
-    }
 
     final oidcUser = authResult.oidcUser;
     final webId = authResult.webId;
@@ -903,9 +900,9 @@ class SolidOidcAuth {
           ));
     } else {
       return SolidOidcAuthUriSettings(
-        redirectUri: Uri.parse('${appUrlScheme}://redirect'),
-        postLogoutRedirectUri: Uri.parse('${appUrlScheme}://logout'),
-        frontChannelLogoutUri: Uri.parse('${appUrlScheme}://logout'),
+        redirectUri: Uri.parse('$appUrlScheme://redirect'),
+        postLogoutRedirectUri: Uri.parse('$appUrlScheme://logout'),
+        frontChannelLogoutUri: Uri.parse('$appUrlScheme://logout'),
       );
     }
   }

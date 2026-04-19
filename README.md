@@ -65,7 +65,7 @@ Create a `client-profile.jsonld` file and host it on HTTPS:
     "https://myapp.com/auth/callback.html",
     "com.mycompany.myapp://logout"
   ],
-  "scope": "openid webid offline_access profile",
+  "scope": "openid webid offline_access",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "token_endpoint_auth_method": "none"

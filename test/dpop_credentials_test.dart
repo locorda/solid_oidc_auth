@@ -6,7 +6,7 @@ void main() {
     late DpopCredentials testCredentials;
 
     setUp(() {
-      testCredentials = const DpopCredentials(
+      testCredentials = DpopCredentials(
         publicKey:
             '-----BEGIN PUBLIC KEY-----\ntest_public_key\n-----END PUBLIC KEY-----',
         privateKey:
@@ -55,10 +55,15 @@ void main() {
       // The original map is modified
       expect(jwkMap.containsKey('modified'), isTrue);
 
-      // But the credentials' JWK is a different instance
-      // (Note: DpopCredentials doesn't deep-copy the map, so this tests
-      // that we created a new map instance via Map.from)
+      // The credentials' JWK is a separate, unmodifiable copy
       expect(identical(credentials.publicKeyJwk, jwkMap), isFalse);
+      expect(credentials.publicKeyJwk.containsKey('modified'), isFalse);
+
+      // Direct mutation of the credentials' JWK should throw
+      expect(
+        () => credentials.publicKeyJwk['evil'] = 'value',
+        throwsA(isA<UnsupportedError>()),
+      );
     });
 
     test('should round-trip through JSON serialization', () {
@@ -110,7 +115,7 @@ void main() {
     test('should contain sensitive data warning in documentation', () {
       // This is a documentation test to ensure developers are aware
       // of security implications
-      const credentials = DpopCredentials(
+      final credentials = DpopCredentials(
         publicKey: 'pub',
         privateKey: 'priv',
         publicKeyJwk: {'kty': 'RSA'},

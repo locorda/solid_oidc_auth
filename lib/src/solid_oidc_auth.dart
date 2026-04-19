@@ -59,7 +59,7 @@ class SolidOidcAuthSettings {
     this.options,
     this.userInfoSettings = const OidcUserInfoSettings(),
     this.refreshBefore = defaultRefreshBefore,
-    this.strictJwtVerification = false,
+    this.strictJwtVerification = true,
     this.getExpiresIn,
     this.sessionManagementSettings = const OidcSessionManagementSettings(),
     this.getIdToken,

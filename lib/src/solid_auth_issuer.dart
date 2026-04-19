@@ -1,63 +1,86 @@
 import 'dart:async';
 
-/// Package imports:
 import 'package:http/http.dart' as http;
+import 'package:locorda_rdf_core/core.dart';
 
-/// Get POD issuer URI
+const _solidOidcIssuer =
+    'http://www.w3.org/ns/solid/terms#oidcIssuer';
+
+/// Extracts the `solid:oidcIssuer` from a WebID profile document, or returns
+/// the input URI unchanged when it does not look like a WebID profile URL.
+///
+/// Throws [ArgumentError] if [textUrl] uses a non-HTTPS scheme on a non-local
+/// host, or if the fetched profile contains no `solid:oidcIssuer` triple.
 Future<String> getIssuer(String textUrl) async {
-  String _issuerUri = '';
   if (textUrl.contains('profile/card#me')) {
-    String pubProf = await fetchProfileData(textUrl);
-    _issuerUri = getIssuerUri(pubProf);
+    _assertSecureUrl(textUrl);
+    final profileBody = await fetchProfileData(textUrl);
+    return getIssuerUri(profileBody, textUrl);
   }
 
-  if (_issuerUri == '') {
-    /// This reg expression works with localhost and other urls
-    RegExp exp = RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+(\.|\:)[\w\.]+');
-    Iterable<RegExpMatch> matches = exp.allMatches(textUrl);
-    matches.forEach((match) {
-      _issuerUri = textUrl.substring(match.start, match.end);
-    });
+  // Treat the input as a direct issuer URI — validate it is a usable absolute URI.
+  final uri = Uri.tryParse(textUrl);
+  if (uri == null || !uri.hasScheme) {
+    throw ArgumentError('Invalid issuer URI: $textUrl');
   }
-  return _issuerUri;
+  return textUrl;
 }
 
-/// Get public profile information from webId
+/// Fetches the Turtle profile document at [profUrl].
+///
+/// Sends `Accept: text/turtle` so the server returns Turtle even when it
+/// supports multiple RDF serialisations.
 Future<String> fetchProfileData(String profUrl) async {
   final response = await http.get(
     Uri.parse(profUrl),
-    headers: <String, String>{
-      'Content-Type': 'text/turtle',
-    },
+    headers: const {'Accept': 'text/turtle'},
   );
 
   if (response.statusCode == 200) {
-    /// If the server did return a 200 OK response,
-    /// then parse the JSON.
     return response.body;
-  } else {
-    /// If the server did not return a 200 OK response,
-    /// then throw an exception.
-    throw Exception('Failed to load data! Try again in a while.');
   }
+  throw Exception(
+    'Failed to load profile from $profUrl (HTTP ${response.statusCode}).',
+  );
 }
 
-/// Read public profile RDF file and get the issuer URI
-String getIssuerUri(String profileRdfStr) {
-  String issuerUri = '';
-  var profileDataList = profileRdfStr.split('\n');
-  for (var i = 0; i < profileDataList.length; i++) {
-    String dataItem = profileDataList[i];
-    if (dataItem.contains(';')) {
-      var itemList = dataItem.split(';');
-      for (var j = 0; j < itemList.length; j++) {
-        String item = itemList[j];
-        if (item.contains('solid:oidcIssuer')) {
-          var issuerUriDivide = item.replaceAll(' ', '').split('<');
-          issuerUri = issuerUriDivide[1].replaceAll('>', '');
-        }
-      }
-    }
+/// Parses [profileTurtle] as a Turtle document and extracts the first
+/// `solid:oidcIssuer` object for [webId].
+///
+/// Throws [ArgumentError] when no `solid:oidcIssuer` triple is found.
+String getIssuerUri(String profileTurtle, String webId) {
+  final graph = turtle.decode(profileTurtle);
+  final triples = graph.findTriples(
+    subject: IriTerm(webId),
+    predicate: const IriTerm(_solidOidcIssuer),
+  );
+  if (triples.isEmpty) {
+    throw ArgumentError(
+      'No solid:oidcIssuer found in profile for WebID <$webId>.',
+    );
   }
-  return issuerUri;
+  final object = triples.first.object;
+  if (object is! IriTerm) {
+    throw ArgumentError(
+      'solid:oidcIssuer value is not an IRI for WebID <$webId>.',
+    );
+  }
+  return object.value;
+}
+
+/// Throws [ArgumentError] if [url] uses HTTP on a non-local host.
+///
+/// Localhost variants (localhost, 127.0.0.1, [::1]) are allowed over plain
+/// HTTP to support local development servers (e.g. Community Solid Server).
+void _assertSecureUrl(String url) {
+  final uri = Uri.parse(url);
+  if (uri.scheme == 'https') return;
+  if (uri.scheme == 'http') {
+    final host = uri.host.toLowerCase();
+    if (host == 'localhost' || host == '127.0.0.1' || host == '[::1]') return;
+    throw ArgumentError(
+      'Insecure HTTP is not permitted for non-local WebID profile URLs. '
+      'Use HTTPS: $url',
+    );
+  }
 }

@@ -37,6 +37,12 @@ Built on the robust foundation of [Bdaya-Dev/oidc](https://pub.dev/packages/oidc
 TODO: List prerequisites and provide or point to information on how to
 start using the package. -->
 
+## 🌐 Live Demo
+
+Try the **[example app](https://locorda.github.io/solid_oidc_auth/example/)** — a working Flutter web app authenticating against a real Solid pod.
+
+Source: [`example/`](example/)
+
 ## 🚀 Quick Start
 
 ### 1. Add to pubspec.yaml

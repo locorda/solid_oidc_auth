@@ -66,9 +66,8 @@ class _MyAppState extends State<MyApp> {
       // - Reliable availability through GitHub's CDN infrastructure
       // - Version-controlled configuration management
       // Production apps should similarly host this document on a trusted, reliable platform.
-      // FIXME: update when merging to upstream!
       oidcClientId:
-          'https://kkalass.github.io/solid_auth/example/client-profile.jsonld',
+          'https://locorda.github.io/solid_oidc_auth/example/client-profile.jsonld',
 
       // App URL Scheme: Custom URI scheme for mobile/desktop platforms (ios/android/macos)
       // SolidOidcAuth will automatically construct redirect and logout URIs using this scheme:
@@ -83,8 +82,7 @@ class _MyAppState extends State<MyApp> {
       //
       // Note: For web-only applications, this parameter is not strictly required
       // but should be set if you plan to support mobile/desktop platforms
-      // FIXME: update when merging to upstream!
-      appUrlScheme: 'de.kalass.solidauth.example',
+      appUrlScheme: 'io.locorda.solidauth.example',
 
       // Frontend Redirect URL: Web-specific redirect URI for browser-based authentication
       // This URL is used for both authentication redirects and logout redirects on web platforms
@@ -95,9 +93,8 @@ class _MyAppState extends State<MyApp> {
       //
       // Security: Browser Same-Origin Policy prevents malicious sites from intercepting
       // the authorization code. DNS security ensures the redirect goes to the intended domain.
-      // FIXME: update when merging to upstream!
       frontendRedirectUrl: Uri.parse(
-        'https://kkalass.github.io/solid_auth/example/redirect.html',
+        'https://locorda.github.io/solid_oidc_auth/example/redirect.html',
       ),
     );
 

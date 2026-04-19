@@ -157,5 +157,9 @@
 /// - [WebID Specification](https://www.w3.org/2005/Incubator/webid/spec/identity/)
 library;
 
+export 'package:solid_oidc_auth/src/oidc/solid_oidc_user_manager.dart'
+    show UserAndWebId;
+
+export 'src/oidc/dpop_credentials.dart' show DpopCredentials, DPoP;
 export 'src/solid_oidc_auth.dart'
     show SolidOidcAuth, SolidOidcAuthSettings, SolidOidcAuthUriSettings;

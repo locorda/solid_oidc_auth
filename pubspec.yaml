@@ -1,6 +1,6 @@
 name: solid_oidc_auth
 description: Authentication library for Solid pods using OpenID Connect (Solid-OIDC) with DPoP token support.
-version: 0.2.0
+version: 0.2.1
 repository: https://github.com/locorda/solid_oidc_auth
 issue_tracker: https://github.com/locorda/solid_oidc_auth/issues
 topics:

@@ -8,10 +8,6 @@ import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
 import 'package:solid_oidc_auth/src/oidc/dpop_credentials.dart';
 import 'package:solid_oidc_auth/src/oidc/solid_oidc_user_manager.dart';
-export 'package:solid_oidc_auth/src/oidc/solid_oidc_user_manager.dart'
-    show UserAndWebId;
-export 'package:solid_oidc_auth/src/oidc/dpop_credentials.dart'
-    show DpopCredentials, DPoP;
 
 /// The default refresh behavior: refresh tokens 1 minute before they expire.
 ///

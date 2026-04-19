@@ -1,3 +1,14 @@
+## [0.2.1]
+
+### Bug Fixes
+
+* Exported `UserAndWebId`, `DpopCredentials`, and `DPoP` from the public
+  library entry point. These types are part of the public API but were
+  accidentally missing from `package:solid_oidc_auth/solid_oidc_auth.dart`,
+  forcing consumers to import internal paths directly.
+* Moved re-exports to the canonical entry point (`lib/solid_oidc_auth.dart`)
+  rather than the implementation file (`lib/src/solid_oidc_auth.dart`).
+
 ## [0.2.0]
 
 This is a ground-up rewrite by [Locorda](https://locorda.dev), forked from

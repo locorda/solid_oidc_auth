@@ -1,7 +1,7 @@
 MIT License
 
 Copyright (c) 2022 anusii
-Copyright (c) 2025 Klaus Kalass
+Copyright (c) 2025-2026 Klas Kalass
 
 Derived from anusii/solid_auth (MIT License).
 Previously contained an embedded copy of dart_jsonwebtoken (MIT License, Copyright (c) 2020 Jonatan Steiner).

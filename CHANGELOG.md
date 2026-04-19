@@ -1,3 +1,13 @@
+## [0.2.2]
+
+### Bug Fixes
+
+* Declare supported platforms explicitly in `pubspec.yaml` (`android`, `ios`,
+  `macos`, `web`). Previously, pub.dev's static analyser inferred platform
+  support from the transitive dependency graph and incorrectly omitted `web`
+  because `fast_rsa` uses `dart:ffi` internally (even though it ships a WASM
+  fallback for web). The explicit `platforms:` key overrides that inference.
+
 ## [0.2.1]
 
 ### Bug Fixes
